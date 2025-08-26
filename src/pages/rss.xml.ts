@@ -38,7 +38,7 @@ export const GET: APIRoute = async ({ site }) => {
         title: post.data.title,
         description: post.data.description || '',
         pubDate: post.data.date,
-        link: `/blog/${post.id}/`,
+        link: `/blog/${post.collection}/${post.id}/`,
         categories: post.data.tags || [],
         author: post.data.authors ? post.data.authors.join(', ') : SITE.author,
       })),

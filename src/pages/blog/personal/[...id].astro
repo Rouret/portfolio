@@ -8,13 +8,13 @@ import { badgeVariants } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
 import Layout from '@/layouts/Layout.astro'
-import { getAdjacentTechPosts, getAllTechPosts } from '@/lib/data-utils'
+import { getAdjacentTechPosts, getAllPersonalPosts } from '@/lib/data-utils'
 import { formatDate, readingTime } from '@/lib/utils'
 import { Icon } from 'astro-icon/components'
 import { render } from 'astro:content'
 
 export async function getStaticPaths() {
-  const posts = await getAllTechPosts()
+  const posts = await getAllPersonalPosts()
   return posts.map((post) => ({
     params: { id: post.id },
     props: post,
@@ -43,7 +43,7 @@ const structuredData = {
 const canonicalUrl = new URL(`/blog/${post.collection}/${post.id}/`, Astro.site).toString()
 ---
 
-<Layout canonicalUrl={canonicalUrl} isWide={true}>
+<Layout canonicalUrl={canonicalUrl}>
   <PostHead slot="head" post={post} />
 
   <script

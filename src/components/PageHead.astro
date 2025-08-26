@@ -95,7 +95,7 @@ const pageTitle =
         '@type': 'BlogPosting',
         headline: post.data.title,
         description: post.data.description,
-        url: `${SITE.href}/blog/${post.id}/`,
+        url: `${SITE.href}/blog/${post.collection}/${post.id}/`,
         datePublished: post.data.date.toISOString(),
         author: {
           '@type': 'Person',

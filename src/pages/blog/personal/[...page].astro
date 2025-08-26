@@ -4,7 +4,7 @@ import PageHead from '@/components/PageHead.astro'
 import Search from '@/components/react/search'
 import PaginationComponent from '@/components/ui/pagination'
 import Layout from '@/layouts/Layout.astro'
-import { getAllTechPosts } from '@/lib/data-utils'
+import { getAllPersonalPosts } from '@/lib/data-utils'
 import type { PaginateFunction } from 'astro'
 import { Icon } from 'astro-icon/components'
 
@@ -13,12 +13,12 @@ export async function getStaticPaths({
 }: {
   paginate: PaginateFunction
 }) {
-  const allPosts = await getAllTechPosts()
+  const allPosts = await getAllPersonalPosts()
   return paginate(allPosts, { pageSize: 5 })
 }
 
 const { page } = Astro.props
-const searchList = await getAllTechPosts()
+const searchList = await getAllPersonalPosts()
 const currentUrl = Astro.url
 ---
 
@@ -28,19 +28,20 @@ const currentUrl = Astro.url
   <Breadcrumbs
     items={[
       { label: 'Blog', href: '/blog', icon: 'lucide:archive' },
-      { label: 'Tech', href: '/blog/tech', icon: 'lucide:brain' },
+      { label: 'Personal', href: '/blog/personal', icon: 'lucide:person-standing' },
       { label: `Page ${page.currentPage}`, icon: 'lucide:folder-open' },
     ]}
   />
   <section class="max-screen mt-12 px-4 md:px-6">
+  
     <h2
       id="skills-title"
       class="font-custom text-foreground mt-2 text-4xl font-bold"
     >
-      Tech Blog
+      Blog
     </h2>
     <p class="text-muted-foreground text-md mt-3 max-w-2xl">
-        Welcome to my tech blog! 
+      Welcome to my blog! 
     </p>
 
     <div class="my-12 flex min-h-[calc(100vh-18rem)] flex-col gap-y-8">

@@ -32,10 +32,6 @@ export const SOCIAL_LINKS: SocialLink[] = [
     label: 'GitHub',
   },
   {
-    href: 'mailto:contact@lucas-rouret.fr',
-    label: 'Email',
-  },
-  {
     href: 'https://www.linkedin.com/in/rouret-lucas/',
     label: 'Linkedin',
   },
@@ -49,8 +45,6 @@ export const ICON_MAP: IconMap = {
   Website: 'lucide:globe',
   GitHub: 'lucide:github',
   Linkedin: 'lucide:linkedin',
-
-  Email: 'lucide:mail',
   RSS: 'lucide:rss',
 }
 
