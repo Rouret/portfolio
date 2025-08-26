@@ -1,0 +1,17 @@
+---
+import { SOCIAL_LINKS } from '@/consts'
+import SocialIcons from './SocialIcons.astro'
+---
+
+<footer class="py-4" aria-label="Footer" role="contentinfo" id="footer">
+  <div
+    class="mx-auto flex max-w-5xl flex-col items-center justify-center gap-y-2 px-4 sm:flex-row sm:justify-between"
+  >
+    <SocialIcons links={SOCIAL_LINKS} />
+    <div class="flex flex-wrap items-center justify-center gap-x-2 text-center">
+      <span class="text-muted-foreground text-sm" aria-label="copyright">
+        2018 - {new Date().getFullYear()} &copy; All rights reserved.
+      </span>
+    </div>
+  </div>
+</footer>

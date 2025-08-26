@@ -1,0 +1,24 @@
+---
+import Breadcrumbs from '@/components/Breadcrumbs.astro'
+import LastPersonalBlogPosts from '@/components/LastPersonalBlogPosts.astro'
+import LastTechBlogPosts from '@/components/LastTechBlogPosts.astro'
+import PageHead from '@/components/PageHead.astro'
+import Layout from '@/layouts/Layout.astro'
+
+
+
+const currentUrl = Astro.url
+---
+
+<Layout canonicalUrl={currentUrl}>
+  <PageHead slot="head" title="Blog" />
+
+  <Breadcrumbs
+    items={[
+      { label: 'Blog', href: '/blog', icon: 'lucide:folder-open' },
+    ]}
+  />
+ 
+  <LastTechBlogPosts client:load />
+  <LastPersonalBlogPosts client:load />
+</Layout>
