@@ -8,12 +8,14 @@ interface Props {
 
 const { post } = Astro.props
 
-
 const collectionName = post.collection
 
 const title = post.data.title || SITE.title
 const description = post.data.description || SITE.description
-const postUrl = new URL(`/blog/${collectionName}/${post.id}/`, SITE.href).toString()
+const postUrl = new URL(
+  `/blog/${collectionName}/${post.id}/`,
+  SITE.href,
+).toString()
 const image = new URL(`/image/${post.id}.png`, SITE.href).toString()
 const author = post.data.authors ? post.data.authors.join(', ') : SITE.author
 

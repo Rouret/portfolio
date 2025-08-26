@@ -4,7 +4,7 @@ import Link from '@/components/Link.astro'
 import PageHead from '@/components/PageHead.astro'
 import { badgeVariants } from '@/components/ui/badge'
 import Layout from '@/layouts/Layout.astro'
-import { getSortedTechTags } from '@/lib/data-utils'
+import { getSortedTechTags } from '@/lib/hashnode'
 import { Icon } from 'astro-icon/components'
 
 const sortedTags = await getSortedTechTags()

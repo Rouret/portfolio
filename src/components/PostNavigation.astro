@@ -8,7 +8,6 @@ import type { CollectionEntry } from 'astro:content'
 interface Props {
   prevPost: CollectionEntry<'tech' | 'personal'> | null
   nextPost: CollectionEntry<'tech' | 'personal'> | null
-
 }
 const { prevPost, nextPost } = Astro.props
 const collectionName = prevPost?.collection

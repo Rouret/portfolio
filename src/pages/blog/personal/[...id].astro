@@ -8,7 +8,8 @@ import { badgeVariants } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
 import Layout from '@/layouts/Layout.astro'
-import { getAdjacentTechPosts, getAllPersonalPosts } from '@/lib/data-utils'
+import { getAllPersonalPosts } from '@/lib/data-utils'
+import { getAdjacentTechPosts } from '@/lib/hashnode'
 import { formatDate, readingTime } from '@/lib/utils'
 import { Icon } from 'astro-icon/components'
 import { render } from 'astro:content'
@@ -40,7 +41,10 @@ const structuredData = {
   keywords: post.data.tags ? post.data.tags.join(', ') : '',
   description: post.data.description || '',
 }
-const canonicalUrl = new URL(`/blog/${post.collection}/${post.id}/`, Astro.site).toString()
+const canonicalUrl = new URL(
+  `/blog/${post.collection}/${post.id}/`,
+  Astro.site,
+).toString()
 ---
 
 <Layout canonicalUrl={canonicalUrl}>
@@ -56,6 +60,11 @@ const canonicalUrl = new URL(`/blog/${post.collection}/${post.id}/`, Astro.site)
       <Breadcrumbs
         items={[
           { href: '/blog', label: 'Blog', icon: 'lucide:archive' },
+          {
+            label: 'Personal',
+            href: '/blog/personal',
+            icon: 'lucide:person-standing',
+          },
           { label: post.data.title, icon: 'lucide:file-text' },
         ]}
       />

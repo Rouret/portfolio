@@ -6,7 +6,6 @@ import PaginationComponent from '@/components/ui/pagination'
 import Layout from '@/layouts/Layout.astro'
 import { getAllPersonalPosts } from '@/lib/data-utils'
 import type { PaginateFunction } from 'astro'
-import { Icon } from 'astro-icon/components'
 
 export async function getStaticPaths({
   paginate,
@@ -28,12 +27,15 @@ const currentUrl = Astro.url
   <Breadcrumbs
     items={[
       { label: 'Blog', href: '/blog', icon: 'lucide:archive' },
-      { label: 'Personal', href: '/blog/personal', icon: 'lucide:person-standing' },
+      {
+        label: 'Personal',
+        href: '/blog/personal',
+        icon: 'lucide:person-standing',
+      },
       { label: `Page ${page.currentPage}`, icon: 'lucide:folder-open' },
     ]}
   />
   <section class="max-screen mt-12 px-4 md:px-6">
-  
     <h2
       id="skills-title"
       class="font-custom text-foreground mt-2 text-4xl font-bold"
@@ -41,7 +43,7 @@ const currentUrl = Astro.url
       Blog
     </h2>
     <p class="text-muted-foreground text-md mt-3 max-w-2xl">
-      Welcome to my blog! 
+      Welcome to my blog!
     </p>
 
     <div class="my-12 flex min-h-[calc(100vh-18rem)] flex-col gap-y-8">

@@ -35,7 +35,10 @@ const blog = await getRecentPersonalPosts(3)
     }
   </ul>
   <div class="flex justify-center" aria-label="see all posts">
-    <Link href="/blog/personal" class={buttonVariants({ variant: 'ghost' }) + ' group'}>
+    <Link
+      href="/blog/personal"
+      class={buttonVariants({ variant: 'ghost' }) + ' group'}
+    >
       See all posts <span
         class="ml-1.5 transition-transform group-hover:translate-x-1"
         >&rarr;</span

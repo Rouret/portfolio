@@ -5,8 +5,6 @@ import LastTechBlogPosts from '@/components/LastTechBlogPosts.astro'
 import PageHead from '@/components/PageHead.astro'
 import Layout from '@/layouts/Layout.astro'
 
-
-
 const currentUrl = Astro.url
 ---
 
@@ -14,11 +12,9 @@ const currentUrl = Astro.url
   <PageHead slot="head" title="Blog" />
 
   <Breadcrumbs
-    items={[
-      { label: 'Blog', href: '/blog', icon: 'lucide:folder-open' },
-    ]}
+    items={[{ label: 'Blog', href: '/blog', icon: 'lucide:folder-open' }]}
   />
- 
-  <LastTechBlogPosts client:load />
-  <LastPersonalBlogPosts client:load />
+
+  <LastTechBlogPosts />
+  <LastPersonalBlogPosts />
 </Layout>

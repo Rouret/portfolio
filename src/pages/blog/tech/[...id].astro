@@ -8,23 +8,31 @@ import { badgeVariants } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
 import Layout from '@/layouts/Layout.astro'
-import { getAdjacentTechPosts, getAllTechPosts } from '@/lib/data-utils'
-import { formatDate, readingTime } from '@/lib/utils'
+import {
+  getAdjacentTechPosts,
+  getAllTechPosts,
+  getTechPost,
+} from '@/lib/hashnode'
+
+import { formatDate } from '@/lib/utils'
 import { Icon } from 'astro-icon/components'
 import { render } from 'astro:content'
 
 export async function getStaticPaths() {
-  const posts = await getAllTechPosts()
-  return posts.map((post) => ({
-    params: { id: post.id },
-    props: post,
-  }))
+  const data = await getAllTechPosts()
+
+  return data.map((post) => {
+    return {
+      params: { id: post.id },
+    }
+  })
 }
 
-const post = Astro.props
-const currentPostId = Astro.params.id
+const { id } = Astro.params
+const post = await getTechPost(id)
+
 const { Content, headings } = await render(post)
-const { next, prev } = await getAdjacentTechPosts(currentPostId)
+const { next, prev } = await getAdjacentTechPosts(id)
 
 const structuredData = {
   '@context': 'https://schema.org',
@@ -40,7 +48,10 @@ const structuredData = {
   keywords: post.data.tags ? post.data.tags.join(', ') : '',
   description: post.data.description || '',
 }
-const canonicalUrl = new URL(`/blog/${post.collection}/${post.id}/`, Astro.site).toString()
+const canonicalUrl = new URL(
+  `/blog/${post.collection}/${post.id}/`,
+  Astro.site,
+).toString()
 ---
 
 <Layout canonicalUrl={canonicalUrl} isWide={true}>
@@ -56,6 +67,7 @@ const canonicalUrl = new URL(`/blog/${post.collection}/${post.id}/`, Astro.site)
       <Breadcrumbs
         items={[
           { href: '/blog', label: 'Blog', icon: 'lucide:archive' },
+          { label: 'Tech', href: '/blog/tech', icon: 'lucide:brain' },
           { label: post.data.title, icon: 'lucide:file-text' },
         ]}
       />
@@ -96,7 +108,7 @@ const canonicalUrl = new URL(`/blog/${post.collection}/${post.id}/`, Astro.site)
       <div class="flex items-center gap-2">
         <span>{formatDate(post.data.date)}</span>
         <Separator orientation="vertical" className="h-4!" />
-        <span>{readingTime(post.body!)}</span>
+        <Fragment set:html={post.body} />
         <Separator orientation="vertical" className="h-4!" />
         <span>By {(post.data.authors ?? []).join(' & ')}</span>
       </div>
