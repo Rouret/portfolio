@@ -16,31 +16,34 @@ const blog = await getRecentTechPosts(3)
     <h2
       id="latest-posts-title"
       class="font-custom text-foreground text-2xl font-bold"
-      title="latest blog posts"
-      aria-label="latest blog posts"
+      title="sharing technical knowledge and discoveries"
+      aria-label="sharing technical knowledge and discoveries"
     >
       Latest Tech Blog Posts
     </h2>
-    <p class="text-muted-foreground text-sm" aria-label="blog description">
-      Here are some of my latest tech blog posts. You can find more on my blog
-      page.
+    <p class="text-muted-foreground text-sm" aria-label="tech blog description">
+      I believe in learning by sharing. Here's what I've discovered,
+      experimented with, and learned along my technical journey.
     </p>
   </div>
   <ul class="flex flex-col gap-y-4">
     {
-      blog.map((post) => (
+      blog.map((post, index) => (
         <li>
-          <BlogCard entry={post} />
+          <BlogCard entry={post} isLatest={index === 0} />
         </li>
       ))
     }
   </ul>
-  <div class="flex justify-center" aria-label="see all posts">
+  <div
+    class="flex justify-center"
+    aria-label="discover more technical learnings"
+  >
     <Link
       href="/blog/tech"
       class={buttonVariants({ variant: 'ghost' }) + ' group'}
     >
-      See all tech posts <span
+      Discover more learnings <span
         class="ml-1.5 transition-transform group-hover:translate-x-1"
         >&rarr;</span
       >

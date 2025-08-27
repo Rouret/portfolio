@@ -16,30 +16,34 @@ const blog = await getRecentPersonalPosts(3)
     <h2
       id="latest-posts-title"
       class="font-custom text-foreground text-2xl font-bold"
-      title="latest blog posts"
-      aria-label="latest blog posts"
+      title="my personal thoughts and experiences"
+      aria-label="my personal thoughts and experiences"
     >
-      Latest Blog Posts
+      My Personal Journey
     </h2>
-    <p class="text-muted-foreground text-sm" aria-label="blog description">
-      Here are some of my latest blog posts. You can find more on my blog page.
+    <p
+      class="text-muted-foreground text-sm"
+      aria-label="personal blog description"
+    >
+      Sharing my thoughts, experiences, and lessons learned along the way. These
+      stories reflect who I am and what drives me forward.
     </p>
   </div>
   <ul class="flex flex-col gap-y-4">
     {
-      blog.map((post) => (
+      blog.map((post, index) => (
         <li>
-          <BlogCard entry={post} />
+          <BlogCard entry={post} isLatest={index === 0} />
         </li>
       ))
     }
   </ul>
-  <div class="flex justify-center" aria-label="see all posts">
+  <div class="flex justify-center" aria-label="explore personal journey">
     <Link
       href="/blog/personal"
       class={buttonVariants({ variant: 'ghost' }) + ' group'}
     >
-      See all posts <span
+      Explore my journey <span
         class="ml-1.5 transition-transform group-hover:translate-x-1"
         >&rarr;</span
       >

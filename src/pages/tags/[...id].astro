@@ -21,7 +21,7 @@ export async function getStaticPaths() {
           posts,
         },
       }
-    }),
+    })
   )
 }
 
@@ -53,9 +53,9 @@ const currentUrl = Astro.url
 
   <ul class="flex flex-col gap-y-4">
     {
-      posts.map((post) => (
+      posts.map((post, index) => (
         <li>
-          <BlogCard entry={post} />
+          <BlogCard entry={post} isLatest={index === 0} />
         </li>
       ))
     }

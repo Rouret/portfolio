@@ -95,7 +95,7 @@ function Search({ searchList, initialPosts }) {
         <ul className="flex flex-col gap-4">
           {filteredPosts.slice(0, 50).map((post, index) => (
             <li key={post.id || post.slug || index}>
-              <BlogCardJSX entry={post} />
+              <BlogCardJSX entry={post} isLatest={index === 0} />
             </li>
           ))}
         </ul>

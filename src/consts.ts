@@ -59,9 +59,7 @@ export type Technologies = {
   'Hosting and Cloud Services': Category[]
   'Operating Systems': Category[]
   'Other Programming Languages and Technologies': Category[]
-  'Web Servers': Category[]
   Databases: Category[]
-  'Other Software': Category[]
 }
 
 export const technologies: Technologies = {
@@ -69,40 +67,30 @@ export const technologies: Technologies = {
     { text: 'HTML', logo: 'mdi:language-html5' },
     { text: 'JavaScript', logo: 'mdi:language-javascript' },
     { text: 'CSS', logo: 'mdi:language-css3' },
-    { text: 'PHP', logo: 'mdi:language-php' },
     { text: 'Astro', logo: 'simple-icons:astro' },
     { text: 'Tailwind CSS', logo: 'mdi:tailwind' },
+    { text: 'React', logo: 'mdi:react' },
+    { text: 'Next.js', logo: 'cib:nextjs' },
+    { text: 'React Native', logo: 'cib:react' },
+    { text: 'Expo', logo: 'cib:expo' },
   ],
   'Development Tools': [
     { text: 'Visual Studio Code', logo: 'mdi:visual-studio-code' },
     { text: 'Git', logo: 'mdi:git' },
+    { text: 'Docker', logo: 'mdi:docker' },
   ],
-  'Hosting and Cloud Services': [
-    { text: 'DigitalOcean', logo: 'mdi:digital-ocean' },
-    { text: 'Cloudflare', logo: 'cib:cloudflare' },
-    { text: 'Netlify', logo: 'cib:netlify' },
-  ],
+  'Hosting and Cloud Services': [{ text: 'Vercel', logo: 'cib:vercel' }],
   'Operating Systems': [
     { text: 'Windows', logo: 'mdi:windows' },
     { text: 'Ubuntu', logo: 'mdi:ubuntu' },
+    { text: 'Mac OS', logo: 'mdi:apple' },
   ],
   'Other Programming Languages and Technologies': [
-    { text: 'Lua', logo: 'mdi:language-lua' },
-    { text: 'Golang', logo: 'mdi:language-go' },
     { text: 'Node.js', logo: 'mdi:nodejs' },
-  ],
-  'Web Servers': [
-    { text: 'Apache', logo: 'cib:apache' },
-    { text: 'Nginx', logo: 'cib:nginx' },
+    { text: 'TypeScript', logo: 'mdi:language-typescript' },
   ],
   Databases: [
+    { text: 'PostgreSQL', logo: 'cib:postgresql' },
     { text: 'MySQL', logo: 'cib:mysql' },
-    { text: 'MongoDB', logo: 'cib:mongodb' },
-  ],
-  'Other Software': [
-    { text: 'Discord', logo: 'mdi:discord' },
-    { text: 'Spotify', logo: 'mdi:spotify' },
-    { text: 'Visual Studio', logo: 'mdi:visual-studio' },
-    { text: 'Brave', logo: 'cib:brave' },
   ],
 }
