@@ -101,7 +101,7 @@ export async function GET(context: APIContext) {
         <div style="display: flex; align-items: center; background: rgba(21,21,21, 0.8); border-radius: 18px; padding: 12px 22px; border: 1px solid rgba(255, 255, 255, 0.1);">
           <img src="https://res.cloudinary.com/dtkix7qix/image/upload/v1744410119/logo_wkn0ie.png" alt="Logo" style="width: 64px; height: 48px;" width="64" height="48" />
           <div style="display: flex; flex-direction: column; margin-left: 18px; border-left: 1px solid rgba(255, 255, 255, 0.12); padding-left: 18px;">
-            <span style="color: ${colors.text.primary}; font-weight: 600; font-size: 18px;">David Cojocaru</span>
+            <span style="color: ${colors.text.primary}; font-weight: 600; font-size: 18px;">Lucas Rouret</span>
             <span style="color: ${colors.text.muted}; font-size: 14px;">cojocaru-david</span>
           </div>
         </div>
