@@ -8,8 +8,7 @@ import { badgeVariants } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
 import Layout from '@/layouts/Layout.astro'
-import { getAllPersonalPosts } from '@/lib/data-utils'
-import { getAdjacentTechPosts } from '@/lib/hashnode'
+import { getAdjacentPersonalPosts, getAllPersonalPosts } from '@/lib/data-utils'
 import { formatDate, readingTime } from '@/lib/utils'
 import { Icon } from 'astro-icon/components'
 import { render } from 'astro:content'
@@ -17,15 +16,16 @@ import { render } from 'astro:content'
 export async function getStaticPaths() {
   const posts = await getAllPersonalPosts()
   return posts.map((post) => ({
-    params: { id: post.id },
+    params: { id: post.slug },
     props: post,
   }))
 }
 
 const post = Astro.props
-const currentPostId = Astro.params.id
+const currentPostSlug = Astro.params.id
+
 const { Content, headings } = await render(post)
-const { next, prev } = await getAdjacentTechPosts(currentPostId)
+const { next, prev } = await getAdjacentPersonalPosts(currentPostSlug)
 
 const structuredData = {
   '@context': 'https://schema.org',
@@ -37,13 +37,13 @@ const structuredData = {
     '@type': 'Person',
     name: post.data.authors ? post.data.authors[0] : 'Author',
   },
-  image: new URL(`/image/${post.id}.png`, Astro.site).toString(),
+  image: new URL(`/image/${post.slug}.png`, Astro.site).toString(),
   keywords: post.data.tags ? post.data.tags.join(', ') : '',
   description: post.data.description || '',
 }
 const canonicalUrl = new URL(
-  `/blog/${post.collection}/${post.id}/`,
-  Astro.site,
+  `/blog/${post.collection}/${post.slug}/`,
+  Astro.site
 ).toString()
 ---
 
@@ -107,7 +107,7 @@ const canonicalUrl = new URL(
         <Separator orientation="vertical" className="h-4!" />
         <span>{readingTime(post.body!)}</span>
         <Separator orientation="vertical" className="h-4!" />
-        <span>By {(post.data.authors ?? []).join(' & ')}</span>
+        <span>By Lucas Rouret</span>
       </div>
     </div>
 
@@ -135,7 +135,7 @@ const canonicalUrl = new URL(
 
       <div class="flex flex-wrap gap-2">
         <Link
-          href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(Astro.site + 'blog/' + post.id)}`}
+          href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(Astro.site + 'blog/personal/' + post.slug)}`}
           target="_blank"
           rel="noopener noreferrer"
           title="Share on Facebook"
@@ -146,7 +146,7 @@ const canonicalUrl = new URL(
           </Button>
         </Link>
         <Link
-          href={`https://twitter.com/intent/tweet?url=${encodeURIComponent(Astro.site + 'blog/' + post.id)}`}
+          href={`https://twitter.com/intent/tweet?url=${encodeURIComponent(Astro.site + 'blog/personal/' + post.slug)}`}
           target="_blank"
           rel="noopener noreferrer"
           title="Share on Twitter"
@@ -157,7 +157,7 @@ const canonicalUrl = new URL(
           </Button>
         </Link>
         <Link
-          href={`https://www.linkedin.com/shareArticle?mini=true&url=${encodeURIComponent(Astro.site + 'blog/' + post.id)}`}
+          href={`https://www.linkedin.com/shareArticle?mini=true&url=${encodeURIComponent(Astro.site + 'blog/personal/' + post.slug)}`}
           target="_blank"
           rel="noopener noreferrer"
           title="Share on LinkedIn"
@@ -168,7 +168,7 @@ const canonicalUrl = new URL(
           </Button>
         </Link>
         <Link
-          href={`https://www.reddit.com/submit?url=${encodeURIComponent(Astro.site + 'blog/' + post.id)}`}
+          href={`https://www.reddit.com/submit?url=${encodeURIComponent(Astro.site + 'blog/personal/' + post.slug)}`}
           target="_blank"
           rel="noopener noreferrer"
           title="Share on Reddit"
@@ -179,7 +179,7 @@ const canonicalUrl = new URL(
           </Button>
         </Link>
         <Link
-          href={`https://wa.me/?text=${encodeURIComponent(Astro.site + 'blog/' + post.id)}`}
+          href={`https://wa.me/?text=${encodeURIComponent(Astro.site + 'blog/personal/' + post.slug)}`}
           target="_blank"
           rel="noopener noreferrer"
           title="Share on WhatsApp"
@@ -190,7 +190,7 @@ const canonicalUrl = new URL(
           </Button>
         </Link>
         <Link
-          href={`https://t.me/share/url?url=${encodeURIComponent(Astro.site + 'blog/' + post.id)}`}
+          href={`https://t.me/share/url?url=${encodeURIComponent(Astro.site + 'blog/personal/' + post.slug)}`}
           target="_blank"
           rel="noopener noreferrer"
           title="Share on Telegram"
@@ -201,7 +201,7 @@ const canonicalUrl = new URL(
           </Button>
         </Link>
         <Link
-          href={`https://pinterest.com/pin/create/button/?url=${encodeURIComponent(Astro.site + 'blog/' + post.id)}`}
+          href={`https://pinterest.com/pin/create/button/?url=${encodeURIComponent(Astro.site + 'blog/personal/' + post.slug)}`}
           target="_blank"
           rel="noopener noreferrer"
           title="Share on Pinterest"
@@ -247,7 +247,7 @@ const canonicalUrl = new URL(
 
           scrollToTopButton.classList.toggle(
             'hidden',
-            window.scrollY <= 300 || isFooterVisible,
+            window.scrollY <= 300 || isFooterVisible
           )
         })
       }

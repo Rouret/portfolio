@@ -5,6 +5,7 @@ import { getCollection } from 'astro:content'
 import type { APIContext } from 'astro'
 import fs from 'fs'
 import path from 'path'
+import { getAllPersonalPosts } from '@/lib/data-utils'
 
 const MontserratRegular = fs.readFileSync(
   path.resolve('./public/fonts2/_montserrat_regular.ttf'),
@@ -171,8 +172,10 @@ export async function GET(context: APIContext) {
 }
 
 export async function getStaticPaths() {
-  const posts = await getCollection('tech')
-  return posts.map((post) => ({
+  const techPosts = await getCollection('tech')
+  const personalPosts = await getAllPersonalPosts()
+
+  const techPaths = techPosts.map((post) => ({
     params: {
       id: post.id,
     },
@@ -180,7 +183,21 @@ export async function getStaticPaths() {
       title: post.data.title,
       date: post.data.date,
       description: post.data.description,
-      tags: post.data.tags,
+      tags: post.data.tags || [],
     },
   }))
+
+  const personalPaths = personalPosts.map((post) => ({
+    params: {
+      id: post.slug,
+    },
+    props: {
+      title: post.data.title,
+      date: post.data.date,
+      description: post.data.description,
+      tags: post.data.tags || [],
+    },
+  }))
+
+  return [...techPaths, ...personalPaths]
 }

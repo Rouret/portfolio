@@ -1,18 +1,23 @@
 import { Badge } from '@/components/ui/badge'
 import { Hash } from 'lucide-react'
 import type { CollectionEntry } from 'astro:content'
+import type { PersonalPostWithSlug } from '@/lib/data-utils'
 
 const BlogCardJSX = ({
   entry,
 }: {
-  entry: CollectionEntry<'tech'> | CollectionEntry<'personal'>
+  entry: CollectionEntry<'tech'> | PersonalPostWithSlug
 }) => {
+  const getPostUrl = () => {
+    if (entry.collection === 'personal') {
+      return `/blog/${entry.collection}/${(entry as PersonalPostWithSlug).slug}`
+    }
+    return `/blog/${entry.collection}/${entry.id}`
+  }
+
   return (
     <div className="hover:bg-secondary/50 rounded-xl border p-4 transition-colors duration-300 ease-in-out">
-      <a
-        href={`blog/${entry.collection}/${entry.id}`}
-        className="flex flex-col gap-4 sm:flex-row"
-      >
+      <a href={getPostUrl()} className="flex flex-col gap-4 sm:flex-row">
         <div className="grow">
           <h3 className="mb-1 text-lg font-medium">{entry.data.title}</h3>
           <p className="text-muted-foreground mb-2 text-sm">

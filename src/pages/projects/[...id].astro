@@ -1,7 +1,6 @@
 ---
 import Breadcrumbs from '@/components/Breadcrumbs.astro'
 import PageHead from '@/components/PageHead.astro'
-import TableOfContents from '@/components/TableOfContents.astro'
 import { badgeVariants } from '@/components/ui/badge'
 import Layout from '@/layouts/Layout.astro'
 import { getAllProjects } from '@/lib/data-utils'
@@ -18,7 +17,7 @@ export async function getStaticPaths() {
 }
 
 const project = Astro.props
-const { Content, headings } = await render(project)
+const { Content } = await render(project)
 
 const structuredData = {
   '@context': 'https://schema.org',
@@ -95,41 +94,8 @@ const currentUrl = Astro.url
       height={800}
     />
 
-    {headings.length > 0 && <TableOfContents headings={headings} />}
-
     <article class="prose col-start-2 max-w-none" aria-label="Project">
       <Content />
     </article>
-
-    <aside
-      class="group col-start-2 rounded-xl border p-4 xl:sticky xl:top-26 xl:col-start-3 xl:mr-auto xl:ml-8 xl:h-[calc(100vh-5rem)] xl:max-w-fit xl:rounded-none xl:border-none xl:p-0"
-    >
-      <div
-        class="bg-card flex flex-col gap-4 rounded-xl border p-4 shadow-md transition-all duration-300 group-hover:shadow-lg xl:group-hover:shadow-none"
-      >
-        <h2 class="text-lg font-semibold">Project Details</h2>
-        <div class="text-muted-foreground flex flex-col gap-2 text-sm">
-          <p>{project.data.description}</p>
-        </div>
-
-        <hr class="my-4 border-t" />
-
-        <div class="text-muted-foreground flex flex-col gap-2 text-sm">
-          <h3 class="text-base font-semibold">Project Links</h3>
-          <ul class="list-disc pl-4">
-            <li>
-              <a
-                href={project.data.link}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="Project link"
-              >
-                {project.data.link}
-              </a>
-            </li>
-          </ul>
-        </div>
-      </div>
-    </aside>
   </section>
 </Layout>

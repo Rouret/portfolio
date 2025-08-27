@@ -1,27 +1,37 @@
 import { getCollection, type CollectionEntry } from 'astro:content'
+import { generateSlug } from './utils'
+
+export type PersonalPostWithSlug = CollectionEntry<'personal'> & {
+  slug: string
+}
 
 const filterPersonalPosts = (
   posts: CollectionEntry<'personal'>[],
-): CollectionEntry<'personal'>[] => {
+): PersonalPostWithSlug[] => {
   return posts
     .filter((post) => !post.data.draft)
     .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())
+    .map((post) => ({
+      ...post,
+      slug: post.data.slug || generateSlug(post.data.title),
+    }))
 }
 
 const filterRecentPersonalPosts = (
-  posts: CollectionEntry<'personal'>[],
+  posts: PersonalPostWithSlug[],
   count: number,
-): CollectionEntry<'personal'>[] => {
-  const postsByDay = posts.reduce<
-    Record<string, CollectionEntry<'personal'>[]>
-  >((acc, post) => {
-    const key = getDayKey(post.data.date)
-    if (!acc[key]) {
-      acc[key] = []
-    }
-    acc[key].push(post)
-    return acc
-  }, {})
+): PersonalPostWithSlug[] => {
+  const postsByDay = posts.reduce<Record<string, PersonalPostWithSlug[]>>(
+    (acc, post) => {
+      const key = getDayKey(post.data.date)
+      if (!acc[key]) {
+        acc[key] = []
+      }
+      acc[key].push(post)
+      return acc
+    },
+    {},
+  )
 
   const randomPostsPerDay = Object.values(postsByDay).map((postsForDay) => {
     const randomIndex = Math.floor(Math.random() * postsForDay.length)
@@ -41,7 +51,7 @@ export function getDayKey(date: string | Date): string {
 // ------------------------------ All posts ------------------------------
 
 export const getAllPersonalPosts = async (): Promise<
-  CollectionEntry<'personal'>[]
+  PersonalPostWithSlug[]
 > => {
   const posts = await getCollection('personal')
   return filterPersonalPosts(posts)
@@ -51,19 +61,19 @@ export const getAllPersonalPosts = async (): Promise<
 
 export async function getRecentPersonalPosts(
   count: number,
-): Promise<CollectionEntry<'personal'>[]> {
+): Promise<PersonalPostWithSlug[]> {
   const posts = await getAllPersonalPosts()
   return filterRecentPersonalPosts(posts, count)
 }
 
 // ------------------------------ Adjacent posts ------------------------------
 
-export async function getAdjacentPersonalPosts(currentId: string): Promise<{
-  prev: CollectionEntry<'personal'> | null
-  next: CollectionEntry<'personal'> | null
+export async function getAdjacentPersonalPosts(currentSlug: string): Promise<{
+  prev: PersonalPostWithSlug | null
+  next: PersonalPostWithSlug | null
 }> {
   const posts = await getAllPersonalPosts()
-  const currentIndex = posts.findIndex((post) => post.id === currentId)
+  const currentIndex = posts.findIndex((post) => post.slug === currentSlug)
 
   if (currentIndex === -1) {
     return { prev: null, next: null }
@@ -100,28 +110,25 @@ export async function getSortedPersonalTags(): Promise<
 }
 
 export function groupPersonalPostsByYear(
-  posts: CollectionEntry<'personal'>[],
-): Record<string, CollectionEntry<'personal'>[]> {
-  return posts.reduce(
-    (acc: Record<string, CollectionEntry<'personal'>[]>, post) => {
-      const year = post.data.date.getFullYear().toString()
-      ;(acc[year] ??= []).push(post)
-      return acc
-    },
-    {},
-  )
+  posts: PersonalPostWithSlug[],
+): Record<string, PersonalPostWithSlug[]> {
+  return posts.reduce((acc: Record<string, PersonalPostWithSlug[]>, post) => {
+    const year = post.data.date.getFullYear().toString()
+    ;(acc[year] ??= []).push(post)
+    return acc
+  }, {})
 }
 
 export async function getPersonalPostsByAuthor(
   authorId: string,
-): Promise<CollectionEntry<'personal'>[]> {
+): Promise<PersonalPostWithSlug[]> {
   const posts = await getAllPersonalPosts()
   return posts.filter((post) => post.data.authors?.includes(authorId))
 }
 
 export async function getPersonalPostsByTag(
   tag: string,
-): Promise<CollectionEntry<'personal'>[]> {
+): Promise<PersonalPostWithSlug[]> {
   const posts = await getAllPersonalPosts()
   return posts.filter((post) => post.data.tags?.includes(tag))
 }

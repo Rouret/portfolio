@@ -1,11 +1,16 @@
 ---
 import Breadcrumbs from '@/components/Breadcrumbs.astro'
-import LastPersonalBlogPosts from '@/components/LastPersonalBlogPosts.astro'
-import LastTechBlogPosts from '@/components/LastTechBlogPosts.astro'
+import Link from '@/components/Link.astro'
 import PageHead from '@/components/PageHead.astro'
+import { Button } from '@/components/ui/button'
 import Layout from '@/layouts/Layout.astro'
+import { getAllPersonalPosts } from '@/lib/data-utils'
+import { getAllTechPosts } from '@/lib/hashnode'
+import { Icon } from 'astro-icon/components'
 
 const currentUrl = Astro.url
+const personalPosts = await getAllPersonalPosts()
+const techPosts = await getAllTechPosts()
 ---
 
 <Layout canonicalUrl={currentUrl}>
@@ -15,6 +20,106 @@ const currentUrl = Astro.url
     items={[{ label: 'Blog', href: '/blog', icon: 'lucide:folder-open' }]}
   />
 
-  <LastTechBlogPosts />
-  <LastPersonalBlogPosts />
+  <section class="mt-12 px-4 md:px-6">
+    <div class="mb-12 text-center">
+      <h1 class="font-custom text-foreground mb-4 text-4xl font-bold">
+        My Blog
+      </h1>
+      <p class="text-muted-foreground mx-auto max-w-2xl text-lg">
+        Discover my articles on technical development and personal reflections
+      </p>
+    </div>
+
+    <div class="mx-auto grid max-w-4xl gap-8 md:grid-cols-2">
+      <!-- Personal Blog Card -->
+      <div
+        class="group bg-card relative overflow-hidden rounded-xl border p-6 transition-all duration-300 hover:shadow-lg"
+      >
+        <div
+          class="absolute inset-0 bg-gradient-to-br from-blue-50/50 to-purple-50/50 opacity-0 transition-opacity duration-300 group-hover:opacity-100 dark:from-blue-950/20 dark:to-purple-950/20"
+        >
+        </div>
+
+        <div class="relative z-10">
+          <div class="mb-4 flex items-center gap-3">
+            <div class="rounded-lg bg-blue-100 p-2 dark:bg-blue-900/30">
+              <Icon
+                name="lucide:person-standing"
+                class="size-6 text-blue-600 dark:text-blue-400"
+              />
+            </div>
+            <h2 class="text-foreground text-2xl font-bold">Personal Blog</h2>
+          </div>
+
+          <p class="text-muted-foreground mb-6">
+            My personal reflections, experiences and learnings in life and
+            personal development.
+          </p>
+
+          <div class="mb-6 flex items-center justify-between">
+            <span class="text-muted-foreground text-sm">
+              {personalPosts.length} articles
+            </span>
+          </div>
+
+          <Link href="/blog/personal" class="block">
+            <Button
+              className="w-full transition-transform duration-200 group-hover:scale-105"
+            >
+              View personal articles
+              <Icon
+                name="lucide:arrow-right"
+                class="ml-2 size-4 transition-transform group-hover:translate-x-1"
+              />
+            </Button>
+          </Link>
+        </div>
+      </div>
+
+      <!-- Tech Blog Card -->
+      <div
+        class="group bg-card relative overflow-hidden rounded-xl border p-6 transition-all duration-300 hover:shadow-lg"
+      >
+        <div
+          class="absolute inset-0 bg-gradient-to-br from-green-50/50 to-teal-50/50 opacity-0 transition-opacity duration-300 group-hover:opacity-100 dark:from-green-950/20 dark:to-teal-950/20"
+        >
+        </div>
+
+        <div class="relative z-10">
+          <div class="mb-4 flex items-center gap-3">
+            <div class="rounded-lg bg-green-100 p-2 dark:bg-green-900/30">
+              <Icon
+                name="lucide:brain"
+                class="size-6 text-green-600 dark:text-green-400"
+              />
+            </div>
+            <h2 class="text-foreground text-2xl font-bold">Tech Blog</h2>
+          </div>
+
+          <p class="text-muted-foreground mb-6">
+            Technical articles, tutorials, and knowledge sharing about web
+            development and technologies.
+          </p>
+
+          <div class="mb-6 flex items-center justify-between">
+            <span class="text-muted-foreground text-sm">
+              {techPosts.length} articles
+            </span>
+          </div>
+
+          <Link href="/blog/tech" class="block">
+            <Button
+              className="w-full transition-transform duration-200 group-hover:scale-105"
+            >
+              View tech articles
+              <Icon
+                name="lucide:arrow-right"
+                class="ml-2 size-4 transition-transform group-hover:translate-x-1"
+              />
+            </Button>
+          </Link>
+        </div>
+      </div>
+    </div>
+  </section>
 </Layout>
