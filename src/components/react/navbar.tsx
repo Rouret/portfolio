@@ -5,7 +5,6 @@ import debounce from 'lodash.debounce'
 import { Menu, X } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { NAV_LINKS, SITE } from '../../consts'
-import Logo from '../ui/logo'
 import Link from './link'
 import ThemeToggle from './theme-toggle'
 
@@ -121,7 +120,6 @@ const Navbar = () => {
             aria-label="Home"
             title="Home"
           >
-            <Logo className="h-8 w-8" />
             <span
               className={
                 'text-foreground/90 transition-opacity duration-200 ease-in-out dark:text-white'

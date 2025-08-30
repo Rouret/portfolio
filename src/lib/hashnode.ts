@@ -16,6 +16,7 @@ export const PostSchema = z.object({
   brief: z.string(),
   slug: z.string(),
   readTimeInMinutes: z.number(),
+  url: z.string(),
   content: z.object({
     html: z.string(),
   }),
@@ -158,6 +159,7 @@ export const getAllTechPosts = async () => {
             edges {
               node {
                 id
+                url
                 author{
                   name
                   profilePicture
@@ -206,6 +208,7 @@ export const getTechPost = async (slug: string) => {
             title
             subtitle
             readTimeInMinutes
+            url
             content{
               html
             }
@@ -267,6 +270,7 @@ const transformHashnodePost = (post: Post): CollectionEntry<'tech'> => {
     body: post.content ? post.content.html : '',
     data: {
       title: post.title,
+      url: post.url,
       description: post.subtitle,
       date: new Date(post.publishedAt),
       image: {

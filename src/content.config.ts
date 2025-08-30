@@ -12,6 +12,7 @@ const techBlog = defineCollection({
       tags: z.array(z.string()).optional(),
       authors: z.array(z.string()).optional(),
       draft: z.boolean().optional(),
+      url: z.string().url(),
     }),
 })
 
@@ -38,7 +39,7 @@ const projects = defineCollection({
       description: z.string(),
       tags: z.array(z.string()),
       image: image(),
-      link: z.string().url(),
+      link: z.string().url().optional(),
       startDate: z.coerce.date().optional(),
       endDate: z.coerce.date().optional(),
     }),
