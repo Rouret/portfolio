@@ -1,6 +1,5 @@
 Todo:
 
-- Refacto list des articles
 - Add project
   - Swelly
   - Work Station
@@ -8,6 +7,6 @@ Todo:
   - Xma
   - Angele colliot
   - Hero.io
-- Do the blog page
 - Do the landing page
 - check sitemap etc
+- lick sur le tag en fonction de l'orriger poura voir les bonnes collectionbs

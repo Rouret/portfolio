@@ -5,12 +5,17 @@ export type Site = {
   author: string
   locale: string
   location: string
-  email: string
 }
 
 export type SocialLink = {
   href: string
   label: string
+}
+
+export type Technology = {
+  name: string
+  icon: string
+  color?: string
 }
 
 export type IconMap = {

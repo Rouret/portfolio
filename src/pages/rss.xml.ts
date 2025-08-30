@@ -1,17 +1,17 @@
-import { SITE } from '@/consts';
-import rss from '@astrojs/rss';
-import type { APIRoute } from 'astro';
-import { getCollection } from 'astro:content';
+import { SITE } from '@/consts'
+import rss from '@astrojs/rss'
+import type { APIRoute } from 'astro'
+import { getCollection } from 'astro:content'
 
 export const GET: APIRoute = async ({ site }) => {
   try {
-    const blogPosts = await getCollection('tech');
+    const blogPosts = await getCollection('tech')
     const posts = blogPosts
       .filter((post) => !post.data.draft)
-      .sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
+      .sort((a, b) => b.data.date.getTime() - a.data.date.getTime())
 
-    const now = new Date();
-    const lastBuildDate = posts.length > 0 ? posts[0].data.date : now;
+    const now = new Date()
+    const lastBuildDate = posts.length > 0 ? posts[0].data.date : now
 
     return rss({
       title: `${SITE.title} - Tech Blog`,
@@ -22,8 +22,8 @@ export const GET: APIRoute = async ({ site }) => {
         <language>${SITE.locale || 'en-us'}</language>
         <lastBuildDate>${lastBuildDate.toUTCString()}</lastBuildDate>
         <ttl>60</ttl>
-        <managingEditor>${SITE.author} (${SITE.email || 'contact@lucas-rouret.fr'})</managingEditor>
-        <webMaster>${SITE.author} (${SITE.email || 'contact@lucas-rouret.fr'})</webMaster>
+        <managingEditor>${SITE.author}</managingEditor>
+        <webMaster>${SITE.author}</webMaster>
         <image>
           <url>${new URL('/ogImage.png', site ?? SITE.href).href}</url>
           <title>${SITE.title}</title>
@@ -32,7 +32,7 @@ export const GET: APIRoute = async ({ site }) => {
         <atom:link href="${new URL('/rss.xml', site ?? SITE.href).href}" rel="self" type="application/rss+xml" />
       `.trim(),
       xmlns: {
-        atom: 'http://www.w3.org/2005/Atom'
+        atom: 'http://www.w3.org/2005/Atom',
       },
       items: posts.map((post) => ({
         title: post.data.title,
@@ -42,9 +42,9 @@ export const GET: APIRoute = async ({ site }) => {
         categories: post.data.tags || [],
         author: post.data.authors ? post.data.authors.join(', ') : SITE.author,
       })),
-    });
+    })
   } catch (error) {
-    console.error('Error generating RSS feed:', error);
-    return new Response('Error generating RSS feed', { status: 500 });
+    console.error('Error generating RSS feed:', error)
+    return new Response('Error generating RSS feed', { status: 500 })
   }
-};
+}

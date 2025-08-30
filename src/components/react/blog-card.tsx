@@ -11,7 +11,6 @@ const BlogCardJSX = ({
   /*  */ entry: CollectionEntry<'tech'> | PersonalPostWithSlug
   isLatest: boolean
 }) => {
-  console.log(isLatest)
   const getPostUrl = () => {
     if (entry.collection === 'personal') {
       return `/blog/${entry.collection}/${(entry as PersonalPostWithSlug).slug}`
@@ -27,7 +26,7 @@ const BlogCardJSX = ({
         <div className="absolute -top-2 -right-2 z-10">
           <Badge
             variant="default"
-            className="bg-green-500 px-2 py-1 text-xs text-white shadow-md"
+            className="bg-green-700 px-2 py-1 text-xs text-white shadow-md"
           >
             Latest
           </Badge>

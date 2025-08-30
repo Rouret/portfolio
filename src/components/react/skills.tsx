@@ -1,58 +1,28 @@
-import { FileCode, Monitor } from 'lucide-react'
 import { useEffect } from 'react'
-import { type IconType } from 'react-icons'
-import { FaQuestionCircle } from 'react-icons/fa'
-import {
-  SiAstro,
-  SiCss3,
-  SiDocker,
-  SiExpo,
-  SiGit,
-  SiHtml5,
-  SiJavascript,
-  SiMacos,
-  SiMysql,
-  SiNextdotjs,
-  SiNodedotjs,
-  SiPostgresql,
-  SiReact,
-  SiTailwindcss,
-  SiTypescript,
-  SiUbuntu,
-  SiVercel,
-} from 'react-icons/si'
-import { technologies, type Category, type Technologies } from '../../consts'
-import { InfiniteScroll } from '../ui/infinite-scroll'
-
-const iconMap: { [key: string]: IconType } = {
-  'mdi:language-html5': SiHtml5,
-  'mdi:language-javascript': SiJavascript,
-  'mdi:language-css3': SiCss3,
-  'simple-icons:astro': SiAstro,
-  'mdi:tailwind': SiTailwindcss,
-  'mdi:react': SiReact,
-  'cib:nextjs': SiNextdotjs,
-  'cib:react': SiReact,
-  'cib:expo': SiExpo,
-  'mdi:visual-studio-code': FileCode,
-  'mdi:git': SiGit,
-  'mdi:docker': SiDocker,
-  'cib:vercel': SiVercel,
-  'mdi:windows': Monitor,
-  'mdi:ubuntu': SiUbuntu,
-  'mdi:apple': SiMacos,
-  'mdi:nodejs': SiNodedotjs,
-  'mdi:language-typescript': SiTypescript,
-  'cib:postgresql': SiPostgresql,
-  'cib:mysql': SiMysql,
+import { FaReact } from 'react-icons/fa'
+import { SiExpo, SiTypescript } from 'react-icons/si'
+type Technology = {
+  name: string
+  icon: React.ReactNode
 }
 
-const categories = Object.keys(technologies)
-const groupSize = Math.ceil(categories.length / 3)
-const categoryGroups = [
-  categories.slice(0, groupSize),
-  categories.slice(groupSize, groupSize * 2),
-  categories.slice(groupSize * 2),
+const technologies: Technology[] = [
+  {
+    name: 'React',
+    icon: <FaReact />,
+  },
+  {
+    name: 'React Native',
+    icon: <FaReact />,
+  },
+  {
+    name: 'Expo',
+    icon: <SiExpo />,
+  },
+  {
+    name: 'TypeScript',
+    icon: <SiTypescript />,
+  },
 ]
 
 const Skills: React.FC = () => {
@@ -64,37 +34,19 @@ const Skills: React.FC = () => {
 
   return (
     <div className="z-30 mx-auto mt-12 flex w-full max-w-[calc(100vw-5rem)] flex-col lg:max-w-full">
-      <div className="space-y-2">
-        {categoryGroups.map((group, groupIndex) => (
-          <InfiniteScroll
-            key={groupIndex}
-            duration={50000}
-            direction={groupIndex % 2 === 0 ? 'normal' : 'reverse'}
-            showFade={true}
-            className="flex flex-row justify-center"
+      <div className="flex flex-row justify-center space-y-2">
+        {technologies.map((technology) => (
+          <div
+            key={technology.name}
+            className="tech-badge repo-card border-border bg-card text-muted-foreground mr-5 flex h-16 items-center gap-3 rounded-full border p-3 shadow-sm backdrop-blur-sm transition-all duration-300 hover:shadow-md"
           >
-            {group.flatMap((category) =>
-              technologies[category as keyof Technologies].map(
-                (tech: Category, techIndex: number) => {
-                  const IconComponent = iconMap[tech.logo] || FaQuestionCircle
-                  return (
-                    <div
-                      key={`${category}-${techIndex}`}
-                      className="tech-badge repo-card border-border bg-card text-muted-foreground mr-5 flex items-center gap-3 rounded-full border p-3 shadow-sm backdrop-blur-sm transition-all duration-300 hover:shadow-md"
-                      data-tech-name={`${category}-${techIndex}`}
-                    >
-                      <span className="bg-muted flex h-10 w-10 items-center justify-center rounded-full p-2 text-lg shadow-inner">
-                        <IconComponent className="tech-icon text-primary" />
-                      </span>
-                      <span className="text-foreground font-medium">
-                        {tech.text}
-                      </span>
-                    </div>
-                  )
-                },
-              ),
-            )}
-          </InfiniteScroll>
+            <span className="bg-muted flex h-10 w-10 items-center justify-center rounded-full p-2 text-lg shadow-inner">
+              {technology.icon}
+            </span>
+            <span className="text-foreground font-medium">
+              {technology.name}
+            </span>
+          </div>
         ))}
       </div>
     </div>

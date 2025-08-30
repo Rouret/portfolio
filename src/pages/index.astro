@@ -3,9 +3,11 @@ import LastPersonalBlogPosts from '@/components/LastPersonalBlogPosts.astro'
 import LastTechBlogPosts from '@/components/LastTechBlogPosts.astro'
 import PageHead from '@/components/PageHead.astro'
 import Skills from '@/components/react/skills'
-import Logo from '@/components/ui/logo'
 import { SITE } from '@/consts'
 import Layout from '@/layouts/Layout.astro'
+import { Image } from 'astro:assets'
+
+import me from '../assets/me.jpg'
 
 const currentUrl = Astro.url
 ---
@@ -19,7 +21,13 @@ const currentUrl = Astro.url
       <div
         class="relative overflow-hidden rounded-lg sm:shrink-0 sm:overflow-hidden sm:rounded-lg"
       >
-        <Logo className="h-auto w-40 object-cover sm:w-48 md:w-56 lg:w-64" />
+        <Image
+          src={me}
+          alt="Logo"
+          width={200}
+          height={200}
+          class="relative overflow-hidden rounded-lg sm:shrink-0 sm:overflow-hidden sm:rounded-lg"
+        />
       </div>
       <div class="mt-8 sm:mt-0 sm:max-w-xl">
         <h1
@@ -84,10 +92,34 @@ const currentUrl = Astro.url
         aria-label="skills"
         role="heading"
       >
+        Current Job
+      </h2>
+      <p class="text-muted-foreground text-sm" aria-label="skills description">
+        I graduated in 2023 and work full-time as a software engineer.
+        <a
+          href="https://apps.theodo.com/a-propos"
+          target="_blank"
+          class="text-primary">Theodo Apps</a
+        >
+      </p>
+      <div></div>
+    </section>
+
+    <section class="relative" aria-labelledby="skills-title">
+      <h2
+        id="skills-title"
+        class="font-custom text-foreground text-2xl font-bold"
+        title="skills"
+        aria-label="skills"
+        role="heading"
+      >
         Skills & Technologies
       </h2>
       <p class="text-muted-foreground text-sm" aria-label="skills description">
-        Here are some of the technologies I've been working with:
+        My professional projects have been primarily built with these
+        technologies. I'm always eager to learn and adapt, and I also have
+        experience with other tools such as: Python, NestJS, ElysiaJS, Spring
+        Boot.
       </p>
       <div>
         <Skills client:load />
