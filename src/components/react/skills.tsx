@@ -38,7 +38,7 @@ const Skills: React.FC = () => {
         {technologies.map((technology) => (
           <div
             key={technology.name}
-            className="tech-badge repo-card border-border bg-card text-muted-foreground mr-5 flex h-16 items-center gap-3 rounded-full border p-3 shadow-sm backdrop-blur-sm transition-all duration-300 hover:shadow-md"
+            className="tech-badge repo-card border-border bg-card text-muted-foreground mr-5 flex h-16 items-center gap-3 rounded-full border pr-5 pl-3 shadow-sm backdrop-blur-sm transition-all duration-300 hover:shadow-md"
           >
             <span className="bg-muted flex h-10 w-10 items-center justify-center rounded-full p-2 text-lg shadow-inner">
               {technology.icon}
