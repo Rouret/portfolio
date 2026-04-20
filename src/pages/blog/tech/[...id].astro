@@ -29,7 +29,7 @@ export async function getStaticPaths() {
 
 const { id } = Astro.params
 const post = await getTechPost(id)
-console.log(post.data.url)
+console.log(post.data)
 
 const { Content, headings } = await render(post)
 const { next, prev } = await getAdjacentTechPosts(id)
@@ -42,6 +42,7 @@ const structuredData = {
   dateModified: post.data.date,
   author: {
     '@type': 'Person',
+
     name: post.data.authors ? post.data.authors[0] : 'Author',
   },
   image: new URL(`/image/${post.id}.png`, Astro.site).toString(),
@@ -50,7 +51,7 @@ const structuredData = {
 }
 const canonicalUrl = new URL(
   `/blog/${post.collection}/${post.id}/`,
-  Astro.site
+  Astro.site,
 ).toString()
 ---
 
@@ -66,7 +67,7 @@ const canonicalUrl = new URL(
       <Breadcrumbs
         items={[
           { href: '/blog', label: 'Blog', icon: 'lucide:archive' },
-          { label: 'Tech', href: '/blog/tech', icon: 'lucide:brain' },
+          { label: 'Blog', href: '/blog', icon: 'lucide:folder-open' },
           { label: post.data.title, icon: 'lucide:file-text' },
         ]}
       />
@@ -259,7 +260,7 @@ const canonicalUrl = new URL(
 
           scrollToTopButton.classList.toggle(
             'hidden',
-            window.scrollY <= 300 || isFooterVisible
+            window.scrollY <= 300 || isFooterVisible,
           )
         })
       }

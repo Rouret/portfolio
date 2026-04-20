@@ -58,20 +58,6 @@ export const GET: APIRoute = async (context) => {
   })
 
   urls.push({
-    loc: `${baseUrl}/blog/tech/`,
-    lastmod: formatDate(latestBlogDate),
-    changefreq: 'weekly',
-    priority: 0.9,
-  })
-
-  urls.push({
-    loc: `${baseUrl}/blog/personal/`,
-    lastmod: formatDate(latestBlogDate),
-    changefreq: 'weekly',
-    priority: 0.9,
-  })
-
-  urls.push({
     loc: `${baseUrl}/projects/`,
     lastmod: formatDate(latestProjectDate),
     changefreq: 'weekly',

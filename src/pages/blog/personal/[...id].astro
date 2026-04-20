@@ -60,11 +60,7 @@ const canonicalUrl = new URL(
       <Breadcrumbs
         items={[
           { href: '/blog', label: 'Blog', icon: 'lucide:archive' },
-          {
-            label: 'Personal',
-            href: '/blog/personal',
-            icon: 'lucide:person-standing',
-          },
+          { label: 'Blog', href: '/blog', icon: 'lucide:folder-open' },
           { label: post.data.title, icon: 'lucide:file-text' },
         ]}
       />

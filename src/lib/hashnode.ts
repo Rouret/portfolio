@@ -273,12 +273,14 @@ const transformHashnodePost = (post: Post): CollectionEntry<'tech'> => {
       url: post.url,
       description: post.subtitle,
       date: new Date(post.publishedAt),
-      image: {
-        src: post.coverImage.url,
-        width: 100,
-        height: 100,
-        format: 'png',
-      },
+      image: post.coverImage
+        ? {
+            src: post.coverImage.url,
+            width: 100,
+            height: 100,
+            format: 'png' as const,
+          }
+        : undefined,
       tags: post.tags.map((tag) => tag.name),
     },
   }
