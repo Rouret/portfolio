@@ -3,8 +3,7 @@ import Breadcrumbs from '@/components/Breadcrumbs.astro'
 import PageHead from '@/components/PageHead.astro'
 import Search from '@/components/react/search'
 import Layout from '@/layouts/Layout.astro'
-import { getAllPersonalPosts } from '@/lib/data-utils'
-import { getAllTechPosts } from '@/lib/hashnode'
+import { getAllPersonalPosts, getAllTechPosts } from '@/lib/data-utils'
 
 const personalPosts = await getAllPersonalPosts()
 const techPosts = await getAllTechPosts()

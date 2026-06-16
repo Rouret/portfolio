@@ -2,7 +2,7 @@
 import Link from '@/components/Link.astro'
 import BlogCard from '@/components/react/blog-card'
 import { buttonVariants } from '@/components/ui/button'
-import { getRecentTechPosts } from '@/lib/hashnode'
+import { getRecentTechPosts } from '@/lib/data-utils'
 
 const blog = await getRecentTechPosts(3)
 ---

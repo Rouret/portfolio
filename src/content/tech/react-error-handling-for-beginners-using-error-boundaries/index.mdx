@@ -1,0 +1,188 @@
+---
+title: 'React Error Handling for Beginners Using Error Boundaries'
+description: 'Explore solutions for handling errors in React applications to deliver a quality user experience and avoid unhandled errors.'
+date: 2024-08-07
+tags:
+  - 'React'
+authors:
+  - 'Lucas Rouret'
+---
+
+### Introduction
+
+Managing errors is crucial for delivering a quality user experience. Unhandled errors, like the absence of feedback when a button is pressed, can negatively impact user satisfaction. To enhance the user experience (UX), it is essential to avoid a lack of response or information when clicking a button or displaying a default 500 error. Today, we have several options for handling errors:
+
+- Using `.catch` on a promise for API calls.
+- Using the `error` option of React Query.
+- Using "Error Boundaries," which is what I will discuss this week.
+
+To start, we will use a mock website and improve the code to achieve the best possible error management.
+
+## ✏️ Creating a Mock Application: Setting the Stage for Error Handling
+
+The application will fetch a list of users to display later.
+
+### Creating a User's hook
+
+For the connector, we will use a non-existent domain name such as "fakeapiontheinternet.com" which will `throw` an error (we could have used a promise with a throw, but here I want to take a concrete example).
+
+```typescript
+export const useUsers = () => {
+  const { data } = useSuspenseQuery<Array<User>>({
+    queryKey: ["users"],
+    queryFn: () =>
+      fetch("https://fakeapiontheinternet.com/users").then(
+        (res) => res.json() as Promise<Array<User>>
+      ),
+  });
+
+  return {
+    users: data,
+  };
+};
+```
+
+We use React Query for the article. If you want to know more about `useSuspenseQuery`, read my article about ["Stop using useQuery from React-Query!"](/blog/tech/stop-using-usequery-from-react-query)
+
+### Structuring the Page: Building the Foundation
+
+```typescript
+function App() {
+  const { users } = useUsers();
+
+  return (
+    <div className="container">
+      <div className="content">
+        {users.length === 0 && <p>Empty ....</p>}
+        {users.length !== 0 && users.map((u) => <p>{u.name}</p>)}
+      </div>
+    </div>
+  );
+}
+```
+
+**Explanation of the Code Above**
+
+Using the previously defined hook:
+
+```typescript
+const { users } = useUsers();
+```
+
+Displaying users based on the state value: "Empty ..." if there are no users, or the usernames of the users.
+
+```typescript
+{users.length === 0 && <p>Empty ....</p>}
+{users.length !== 0 && users.map((u) => <p>{u.name}</p>)}
+```
+
+### 👀 Code Decryption: understanding and anticipating Errors
+
+There is a concept I really like in development: **"First Run First Win."** The principle is very simple. It's like a little game against yourself that leads to significant reflection and learning. For example, in our case, you coded with me, but you don't know the result. Try to play the game and guess the result of this:
+
+> What happens when I load the page?
+
+Have you played the game? 🎰
+
+**The answer: Nothing happens!**
+
+Not exactly nothing! If we analyze our code, our `useUsers` hook has generated an error, which has halted the execution of the rest of the code. That's why we don't even see the "Empty ...".
+
+Put yourself in the user's shoes; this situation is so frustrating!
+
+## 🛡️ Error Boundaries: React's Built-in Solution for Error Handling
+
+Error boundary is a feature in React. To quote:
+
+> "By default, if your application throws an error during rendering, React will remove its UI from the screen. To prevent this, you can wrap a part of your UI into an error boundary. An error boundary is a special component that lets you display some fallback UI instead of the part that crashed—for example, an error message."
+
+This exactly addresses our problem!
+
+To handle our error, we will:
+
+1. Create the "UserList" component which will call our hook.
+2. In `<App />`, we will wrap `<UserList />` with `<ErrorBoundary />`.
+
+Personally, I work with React and React Native. The `react-error-boundary` library is perfect because it ensures compatibility with both React and React Native.
+
+The `ErrorBoundary` component has several properties:
+
+- `fallback`: The simplest way to render a default "something went wrong" type of error message.
+- `fallbackRender`: A function responsible for returning a fallback UI based on the thrown error.
+- `FallbackComponent`: A React component responsible for returning a fallback UI based on the thrown error.
+- `onError`: For logging.
+
+### Implementing Error Boundaries: Step-by-Step Guide
+
+Let's create the `UserList` component, containing our previous code for displaying users.
+
+```typescript
+const UserList = (): JSX.Element => {
+  const { users } = useUsers();
+
+  return (
+    <div className="content">
+      {users.length === 0 && <p>Empty ....</p>}
+      {users.length !== 0 && users.map((u) => <p>{u.name}</p>)}
+    </div>
+  );
+};
+```
+
+Let's update the content of our App to call the `UserList` component.
+
+```typescript
+function App() {
+  return (
+    <div className="container">
+      <UserList />
+    </div>
+  );
+}
+```
+
+### Integrating Error Boundaries: Enhancing User Experience
+
+Let's start using ErrorBoundary with our new UserList component:
+
+```typescript
+<ErrorBoundary fallback={<div>Something went wrong</div>}>
+   <UserList />
+</ErrorBoundary>
+```
+
+We use `ErrorBoundary` from the "react-error-boundary" library to catch and handle errors in our `UserList` component. The `fallback` prop is used to render a simple error message ("Something went wrong") when an error occurs. This ensures that the entire UI does not crash and provides a better user experience by displaying a meaningful message instead of a blank screen or a default error page.
+
+Now, we have an error message ✨
+
+We can now define our `ErrorView` and change the `fallback` property to `FallbackComponent`.
+
+```typescript
+const ErrorView = ({ error, resetErrorBoundary }: FallbackProps) => {
+  return (
+    <div>
+      <h1>Something went wrong</h1>
+      <p style={{ color: "red" }}>{error.message}</p>
+      <button onClick={resetErrorBoundary}>Try again</button>
+    </div>
+  );
+};
+
+function App() {
+  return (
+    ...
+      <ErrorBoundary FallbackComponent={ErrorView}>
+        <UserList />
+      </ErrorBoundary>
+    ...
+  );
+}
+```
+
+💡 The code for my articles is available on this repo: [github.com/Rouret/blog-code](https://github.com/Rouret/blog-code)
+
+## 🔥 Conclusion: Mastering Error Handling for a Seamless User Experience
+
+Mastering error handling in React is crucial for providing a seamless user experience. Techniques like using `.catch` on promises, leveraging the error option in React Query, and utilizing Error Boundaries ensure that your application remains robust and user-friendly even when unexpected errors occur. Error Boundaries, in particular, provide a powerful way to catch and handle errors gracefully, preventing your entire UI from crashing and allowing you to display meaningful fallback content. This not only improves the user experience but also makes your code more maintainable and elegant. By adopting these practices, you can create more resilient React applications that keep users engaged and satisfied.
+
+In conclusion, transitioning to `useSuspenseQuery` and `ErrorBoundary` from traditional `isLoading` and `error` handling methods offers a more elegant and maintainable approach. It enhances both the developer experience and the end-user experience by ensuring that errors are managed gracefully and the application remains robust. By mastering these error handling techniques, you can build React applications that are not only resilient but also provide a seamless and satisfying user experience.

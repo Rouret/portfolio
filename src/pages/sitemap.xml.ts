@@ -1,5 +1,5 @@
 import { SITE } from '@/consts'
-import { getAllTechTags } from '@/lib/hashnode'
+import { getAllTechTags } from '@/lib/data-utils'
 
 import type { APIRoute } from 'astro'
 import { getCollection } from 'astro:content'

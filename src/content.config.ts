@@ -12,7 +12,7 @@ const techBlog = defineCollection({
       tags: z.array(z.string()).optional(),
       authors: z.array(z.string()).optional(),
       draft: z.boolean().optional(),
-      url: z.string().url(),
+      slug: z.string().optional(),
     }),
 })
 

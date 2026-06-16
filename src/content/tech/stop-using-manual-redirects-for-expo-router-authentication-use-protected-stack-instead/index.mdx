@@ -1,0 +1,191 @@
+---
+title: 'Stop Using Manual Redirects for Expo Router Authentication, Use Protected Stack Instead'
+description: 'A guide to using Stack.Protected in Expo SDK 53 for managing authentication and conditional routes in React Native apps.'
+date: 2025-09-09
+tags:
+  - 'React Native'
+  - 'Expo'
+authors:
+  - 'Lucas Rouret'
+---
+
+Managing authentication and conditional redirects in Expo Router traditionally required layouts with manual redirects. With `Stack.Protected` arriving in SDK 53, Expo now offers a more elegant and declarative approach.
+
+### Reminder: How Expo Router Registers Routes
+
+Expo Router uses the file system to automatically generate routes. Every file in the `app/` folder becomes a route:
+
+```
+app/
+├── _layout.tsx          # Root layout
+├── login.tsx            # Route "/login"
+├── (protected)
+    ├── _layout.tsx          # Protected layout
+    ├── index.tsx            # Route "/"
+    └── profile.tsx          # Route "/profile"
+```
+
+Routes are defined in the `_layout.tsx` with `Stack.Screen` components that correspond to your files:
+
+```typescript
+// app/_layout.tsx
+export default function AppLayout() {
+  return (
+    <Stack>
+      <Stack.Screen name="(protected)" />
+      <Stack.Screen name="login" />
+    </Stack>
+  );
+}
+```
+
+### How We Used to Do It: Manual Redirects
+
+Traditionally, to handle authentication, layouts used conditional redirects:
+
+```typescript
+// app/(protected)/_layout.tsx
+export default function RootLayout() {
+  const { status } = useAuth();
+
+  if (status === "unauthenticated") {
+    return <Redirect href="/login" />;
+  }
+
+  return <Stack />;
+}
+```
+
+This approach worked well, but when handling different use cases like first launch or first login, it became challenging.
+
+### The New Approach: Stack.Protected
+
+With `Stack.Protected`, routes can now be declared as accessible based on specific conditions:
+
+```typescript
+// app/_layout.tsx
+export default function RootLayout() {
+  const { status } = useAuth();
+
+  const isAuthed = status === "authenticated";
+  const isNotAuthed = status === "unauthenticated";
+  const isLoading = status === "loading";
+
+  useEffect(() => {
+    if (!isLoading) {
+      SplashScreen.hideAsync();
+    }
+  }, [isLoading]);
+
+  return (
+    <Stack>
+      <Stack.Protected guard={isNotAuthed}>
+          <Stack.Screen name="login" />
+      </Stack.Protected>
+
+      {/* Private routes - only when authenticated */}
+      <Stack.Protected guard={isAuthed}>
+        <Stack.Screen name="index" />
+        <Stack.Screen name="profile" />
+        <Stack.Screen name="settings" />
+      </Stack.Protected>
+    </Stack>
+  );
+}
+```
+
+### Practical Example: First-Time User Management
+
+A complete example managing different app states:
+
+```typescript
+export default function RootLayout() {
+  const { user, isLoading } = useAuth();
+
+  const isFirstTime = !user?.hasCompletedOnboarding;
+  const isLoggedIn = !!user;
+
+  useEffect(() => {
+    if (!isLoading) {
+      SplashScreen.hideAsync();
+    }
+  }, [isLoading]);
+
+  return (
+    <Stack screenOptions={{ headerShown: false }}>
+      {/* Onboarding for new users */}
+      <Stack.Protected guard={isFirstTime}>
+        <Stack.Screen name="onboarding" />
+        <Stack.Screen name="welcome" />
+      </Stack.Protected>
+
+      {/* Authentication screens */}
+      <Stack.Protected guard={!isLoggedIn && !isFirstTime}>
+        <Stack.Screen name="login" />
+        <Stack.Screen name="register" />
+        <Stack.Screen name="forgot-password" />
+      </Stack.Protected>
+
+      {/* Main application */}
+      <Stack.Protected guard={isLoggedIn && !isFirstTime}>
+        <Stack.Screen name="(tabs)" />
+        <Stack.Screen name="profile" />
+        <Stack.Screen name="settings" />
+      </Stack.Protected>
+    </Stack>
+  );
+}
+```
+
+### Beyond Authentication: App States
+
+`Stack.Protected` extends beyond authentication. Example with an Uber-like app:
+
+```typescript
+export default function AppLayout() {
+  const { rideStatus } = useRide();
+
+  return (
+    <Stack>
+      {/* Normal screens when no active ride */}
+      <Stack.Protected guard={rideStatus === 'idle'}>
+        <Stack.Screen name="home" />
+        <Stack.Screen name="history" />
+        <Stack.Screen name="profile" />
+        <Stack.Screen name="payment" />
+      </Stack.Protected>
+
+      {/* During ride - only map */}
+      <Stack.Protected guard={rideStatus === 'in-ride'}>
+        <Stack.Screen name="index" />
+      </Stack.Protected>
+    </Stack>
+  );
+}
+```
+
+Depending on ride state, different screens become available or inaccessible automatically. If a user in an active ride tries accessing `/profile`, automatic redirect to `/ride-map` occurs.
+
+### Automatic Behavior
+
+`Stack.Protected` automatically handles redirects:
+
+- **Blocked navigation:** Attempting access to an inaccessible protected route redirects to the first available screen
+- **State change:** If on a route that becomes inaccessible, automatic redirect occurs
+- **History cleanup:** Navigation history of inaccessible routes is removed
+
+### Advantages of This Approach
+
+**Declarative and readable:** Immediately see which routes are available under which conditions.
+
+**Centralized:** All protection logic exists in the same place, in the layout.
+
+**Automatic:** No need to manually handle redirects in each layout.
+
+**Flexible:** Works for authentication, permissions, app states, etc.
+
+## Conclusion
+
+`Stack.Protected` brings a more modern and declarative approach to handling conditional routes in Expo Router. Instead of managing scattered manual redirects, routes can now be clearly declared as accessible under specific conditions.
+
+This evolution makes code more readable, maintainable, and reduces errors related to manual redirect management. It exemplifies how Expo continues improving the developer experience.

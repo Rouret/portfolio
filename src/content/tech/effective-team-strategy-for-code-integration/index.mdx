@@ -1,0 +1,95 @@
+---
+title: 'Effective Team Strategy for Code Integration'
+description: 'A look at the "Ship Show Ask" method: a flexible approach to code review that lets teams balance speed and quality based on the nature of each change.'
+date: 2024-08-11
+tags:
+  - 'Pull Requests'
+authors:
+  - 'Lucas Rouret'
+---
+
+import { Image } from 'astro:assets'
+import shipImg from '@/assets/blog/ship-show-ask/ship.png'
+import showImg from '@/assets/blog/ship-show-ask/show.png'
+import askImg from '@/assets/blog/ship-show-ask/ask.png'
+
+Pull Requests (PRs) are a crucial tool in the life of any tech project. They enable the introduction of new features and bug fixes, but they offer much more than that!
+
+- They foster discussion
+- Help identify business logic errors
+- Improve code quality
+- Facilitate knowledge sharing 🔥
+
+In the tech world, practices have evolved significantly over the years. With faster development cycles and teams becoming more autonomous, it's important to adapt our working methods.
+
+One such adaptation involves rethinking how we manage code changes within the team.
+
+Development teams are increasingly valuing autonomy. In this context, it's crucial to strike a balance between rigor and flexibility in our processes. This is where the "SHIP SHOW ASK" method comes into play, aligning perfectly with this new dynamic.
+
+But be aware, not all code changes are created equal. Some are critical and require immediate attention, while others are minor and can be handled with less formality. To address this variety, flexible approaches like "SHIP SHOW ASK" have emerged, allowing the review process to be tailored based on the nature of the change.
+
+## Introducing the SHIP SHOW ASK Method
+
+"SHIP SHOW ASK" is a method that enables development teams to deliver code quickly while maintaining transparency and collaboration within the team. It consists of three key steps that adapt to different types of code changes: SHIP, SHOW, and ASK.
+
+## SHIP: for Quick Changes
+
+When a developer identifies a change that doesn't require a thorough code review—such as a minor fix or a documentation update—they can make this change directly on the main branch. The "SHIP" approach assumes that these changes are safe enough to be integrated without waiting for approval from other team members.
+
+<Image src={shipImg} alt="SHIP: commits pushed directly to master" />
+
+Why "SHIP" works well from a developer's perspective:
+
+- "I've added a feature using an established pattern."
+- "I've fixed a minor bug."
+- "I've updated the documentation."
+- "I've improved my code based on previous feedback."
+
+## SHOW: Merging with Confidence
+
+In the "SHOW" stage, you work on a dedicated branch and open a PR. The key difference here is that you don't need to wait for someone else to review your code before merging. You rely on automated checks (unit tests, code coverage, preview deployments, etc.) to ensure your code is ready. Once everything checks out, you merge and notify your team. They can then review what you've done, provide feedback, ask questions, or simply learn from your work.
+
+<Image src={showImg} alt="SHOW: open a PR, merge once CI passes, then notify the team" />
+
+Examples:
+
+- "Take a look at this new approach or model I've used."
+- "I've refactored X, here's the outcome."
+- "I've fixed a bug; here's how I did it."
+
+## ASK: Seeking Feedback and Collaboration
+
+"ASK" comes into play when you're uncertain about the approach you've taken or when you think feedback from your team could improve the quality of your code. You work on a dedicated branch, open a Pull Request, and wait for feedback before merging.
+
+<Image src={askImg} alt="ASK: open a PR, discuss with the team, then merge once CI passes" />
+
+This approach is ideal for situations where:
+
+- You're unsure if your solution is the best one.
+- You need help improving your code.
+- You're working on a new feature or a major refactoring.
+
+## Understanding the Limitations of SHIP SHOW ASK
+
+Here are some factors that limit the application of "SHIP SHOW ASK":
+
+- Lack of Continuous Deployment (CD) in the project.
+- Working with an unfamiliar or frequently changing team.
+- Lack of expertise within the team on the technologies used.
+- Lack of trust and discipline within the team.
+
+These factors hinder the effectiveness of "SHIP SHOW ASK" by creating barriers to autonomy, responsiveness, and effective collaboration within the team.
+
+## Personal Insights on SHIP SHOW ASK
+
+This section reflects personal opinion, providing experience-based perspective. It's not advice—make your own judgment on "SHIP SHOW ASK."
+
+I genuinely believe that "SHIP SHOW ASK" is a great method, but there are prerequisites:
+
+- You need to trust your team and know them well. It might seem trivial, but knowing that your team members won't SHIP a "while true" loop is crucial!
+- Know the project.
+- Know your strengths and weaknesses (strengths => SHOW, weaknesses => ASK). This will help you understand when to ask for help and how to learn from your team's feedback.
+
+## Conclusion: Balancing Speed and Quality in Development
+
+In conclusion, "SHIP SHOW ASK" is a versatile method that empowers development teams to balance speed and quality in their workflows. By categorizing changes into SHIP, SHOW, and ASK, teams can streamline their processes, foster collaboration, and maintain high standards of code quality. However, the success of this method hinges on trust, familiarity with the project, and a clear understanding of team dynamics. When these prerequisites are met, "SHIP SHOW ASK" can significantly enhance productivity and team cohesion, making it a valuable approach in modern software development.

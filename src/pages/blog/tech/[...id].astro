@@ -6,33 +6,26 @@ import PostNavigation from '@/components/PostNavigation.astro'
 import TableOfContents from '@/components/TableOfContents.astro'
 import { badgeVariants } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import { Separator } from '@/components/ui/separator'
 import Layout from '@/layouts/Layout.astro'
-import {
-  getAdjacentTechPosts,
-  getAllTechPosts,
-  getTechPost,
-} from '@/lib/hashnode'
-
-import { formatDate } from '@/lib/utils'
+import { getAdjacentTechPosts, getAllTechPosts } from '@/lib/data-utils'
+import { formatDate, readingTime } from '@/lib/utils'
 import { Icon } from 'astro-icon/components'
 import { render } from 'astro:content'
 
 export async function getStaticPaths() {
-  const data = await getAllTechPosts()
-
-  return data.map((post) => {
-    return {
-      params: { id: post.id },
-    }
-  })
+  const posts = await getAllTechPosts()
+  return posts.map((post) => ({
+    params: { id: post.slug },
+    props: post,
+  }))
 }
 
-const { id } = Astro.params
-const post = await getTechPost(id)
-console.log(post.data)
+const post = Astro.props
+const currentPostSlug = Astro.params.id
 
 const { Content, headings } = await render(post)
-const { next, prev } = await getAdjacentTechPosts(id)
+const { next, prev } = await getAdjacentTechPosts(currentPostSlug)
 
 const structuredData = {
   '@context': 'https://schema.org',
@@ -42,21 +35,21 @@ const structuredData = {
   dateModified: post.data.date,
   author: {
     '@type': 'Person',
-
     name: post.data.authors ? post.data.authors[0] : 'Author',
   },
-  image: new URL(`/image/${post.id}.png`, Astro.site).toString(),
+  image: new URL(`/image/${post.slug}.png`, Astro.site).toString(),
   keywords: post.data.tags ? post.data.tags.join(', ') : '',
   description: post.data.description || '',
 }
 const canonicalUrl = new URL(
-  `/blog/${post.collection}/${post.id}/`,
+  `/blog/${post.collection}/${post.slug}/`,
   Astro.site,
 ).toString()
 ---
 
 <Layout canonicalUrl={canonicalUrl}>
   <PostHead slot="head" post={post} />
+
   <script
     type="application/ld+json"
     is:inline
@@ -105,22 +98,11 @@ const canonicalUrl = new URL(
     <div
       class="text-muted-foreground col-start-2 flex flex-wrap items-center justify-center gap-2 text-sm"
     >
-      <div class="flex flex-col gap-4">
-        <div class="flex items-center gap-2"></div>
+      <div class="flex items-center gap-2">
         <span>{formatDate(post.data.date)}</span>
-        <Link
-          href={post.data.url}
-          target="_blank"
-          rel="noopener noreferrer"
-          class="inline-flex items-center gap-2"
-        >
-          <Icon name="lucide:external-link" class="mr-1 size-4" />
-          Read on Hashnode
-        </Link>
-        <div class="prose max-w-none">
-          <Fragment set:html={post.body} />
-        </div>
-
+        <Separator orientation="vertical" className="h-4!" />
+        <span>{readingTime(post.body!)}</span>
+        <Separator orientation="vertical" className="h-4!" />
         <span>By Lucas Rouret</span>
       </div>
     </div>
@@ -148,7 +130,7 @@ const canonicalUrl = new URL(
 
       <div class="flex flex-wrap gap-2">
         <Link
-          href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(Astro.site + 'blog/' + post.id)}`}
+          href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(Astro.site + 'blog/tech/' + post.slug)}`}
           target="_blank"
           rel="noopener noreferrer"
           title="Share on Facebook"
@@ -159,7 +141,7 @@ const canonicalUrl = new URL(
           </Button>
         </Link>
         <Link
-          href={`https://twitter.com/intent/tweet?url=${encodeURIComponent(Astro.site + 'blog/' + post.id)}`}
+          href={`https://twitter.com/intent/tweet?url=${encodeURIComponent(Astro.site + 'blog/tech/' + post.slug)}`}
           target="_blank"
           rel="noopener noreferrer"
           title="Share on Twitter"
@@ -170,7 +152,7 @@ const canonicalUrl = new URL(
           </Button>
         </Link>
         <Link
-          href={`https://www.linkedin.com/shareArticle?mini=true&url=${encodeURIComponent(Astro.site + 'blog/' + post.id)}`}
+          href={`https://www.linkedin.com/shareArticle?mini=true&url=${encodeURIComponent(Astro.site + 'blog/tech/' + post.slug)}`}
           target="_blank"
           rel="noopener noreferrer"
           title="Share on LinkedIn"
@@ -181,7 +163,7 @@ const canonicalUrl = new URL(
           </Button>
         </Link>
         <Link
-          href={`https://www.reddit.com/submit?url=${encodeURIComponent(Astro.site + 'blog/' + post.id)}`}
+          href={`https://www.reddit.com/submit?url=${encodeURIComponent(Astro.site + 'blog/tech/' + post.slug)}`}
           target="_blank"
           rel="noopener noreferrer"
           title="Share on Reddit"
@@ -192,7 +174,7 @@ const canonicalUrl = new URL(
           </Button>
         </Link>
         <Link
-          href={`https://wa.me/?text=${encodeURIComponent(Astro.site + 'blog/' + post.id)}`}
+          href={`https://wa.me/?text=${encodeURIComponent(Astro.site + 'blog/tech/' + post.slug)}`}
           target="_blank"
           rel="noopener noreferrer"
           title="Share on WhatsApp"
@@ -203,7 +185,7 @@ const canonicalUrl = new URL(
           </Button>
         </Link>
         <Link
-          href={`https://t.me/share/url?url=${encodeURIComponent(Astro.site + 'blog/' + post.id)}`}
+          href={`https://t.me/share/url?url=${encodeURIComponent(Astro.site + 'blog/tech/' + post.slug)}`}
           target="_blank"
           rel="noopener noreferrer"
           title="Share on Telegram"
@@ -214,7 +196,7 @@ const canonicalUrl = new URL(
           </Button>
         </Link>
         <Link
-          href={`https://pinterest.com/pin/create/button/?url=${encodeURIComponent(Astro.site + 'blog/' + post.id)}`}
+          href={`https://pinterest.com/pin/create/button/?url=${encodeURIComponent(Astro.site + 'blog/tech/' + post.slug)}`}
           target="_blank"
           rel="noopener noreferrer"
           title="Share on Pinterest"
