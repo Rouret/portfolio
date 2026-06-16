@@ -33,17 +33,17 @@ const Skills: React.FC = () => {
   }, [])
 
   return (
-    <div className="z-30 mx-auto mt-12 flex w-full max-w-[calc(100vw-5rem)] flex-col lg:max-w-full">
-      <div className="flex flex-row justify-center space-y-2">
+    <div className="z-30 mx-auto mt-12 flex w-full flex-col">
+      <div className="flex flex-row flex-wrap justify-center gap-3">
         {technologies.map((technology) => (
           <div
             key={technology.name}
-            className="tech-badge repo-card border-border bg-card text-muted-foreground mr-5 flex h-16 items-center gap-3 rounded-full border pr-5 pl-3 shadow-sm backdrop-blur-sm transition-all duration-300 hover:shadow-md"
+            className="tech-badge repo-card border-border bg-card text-muted-foreground flex h-12 items-center gap-2 rounded-full border pr-4 pl-2 shadow-sm backdrop-blur-sm transition-all duration-300 hover:shadow-md sm:h-16 sm:gap-3 sm:pr-5 sm:pl-3"
           >
-            <span className="bg-muted flex h-10 w-10 items-center justify-center rounded-full p-2 text-lg shadow-inner">
+            <span className="bg-muted flex h-8 w-8 items-center justify-center rounded-full p-1.5 text-base shadow-inner sm:h-10 sm:w-10 sm:p-2 sm:text-lg">
               {technology.icon}
             </span>
-            <span className="text-foreground font-medium">
+            <span className="text-foreground text-sm font-medium sm:text-base">
               {technology.name}
             </span>
           </div>
