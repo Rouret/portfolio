@@ -1,20 +1,17 @@
 import { SITE } from '@/consts'
+import { getAllArticles } from '@/lib/data-utils'
 import rss from '@astrojs/rss'
 import type { APIRoute } from 'astro'
-import { getCollection } from 'astro:content'
 
 export const GET: APIRoute = async ({ site }) => {
   try {
-    const blogPosts = await getCollection('tech')
-    const posts = blogPosts
-      .filter((post) => !post.data.draft)
-      .sort((a, b) => b.data.date.getTime() - a.data.date.getTime())
+    const posts = await getAllArticles()
 
     const now = new Date()
     const lastBuildDate = posts.length > 0 ? posts[0].data.date : now
 
     return rss({
-      title: `${SITE.title} - Tech Blog`,
+      title: `${SITE.title} - Blog`,
       description: SITE.description,
       site: site ?? SITE.href.replace(/\/$/, ''),
       trailingSlash: false,
@@ -38,7 +35,7 @@ export const GET: APIRoute = async ({ site }) => {
         title: post.data.title,
         description: post.data.description || '',
         pubDate: post.data.date,
-        link: `/blog/${post.collection}/${post.id}/`,
+        link: `/articles/${post.slug}/`,
         categories: post.data.tags || [],
         author: post.data.authors ? post.data.authors.join(', ') : SITE.author,
       })),

@@ -5,7 +5,6 @@ import { Badge } from '@/components/ui/badge'
 import BlogCardJSX from './blog-card'
 import debounce from 'lodash.debounce'
 import { cn } from '@/lib/utils'
-import { BookOpen, Code2 } from 'lucide-react'
 
 const fuseOptions = {
   keys: ['data.title', 'data.description', 'data.tags'],
@@ -16,10 +15,9 @@ const fuseOptions = {
   sortFn: (a, b) => a.score - b.score,
 }
 
-function Search({ searchList, initialPosts, showCollectionFilter = false }) {
+function Search({ searchList, initialPosts }) {
   const [query, setQuery] = useState('')
   const [searchResults, setSearchResults] = useState(initialPosts)
-  const [collectionFilter, setCollectionFilter] = useState(null) // null | 'tech' | 'personal'
   const [tagFilter, setTagFilter] = useState(null) // null | string
 
   const processedSearchList = useMemo(
@@ -63,12 +61,9 @@ function Search({ searchList, initialPosts, showCollectionFilter = false }) {
     handleOnSearch(searchQuery)
   }
 
-  // Final posts = search results → collection filter → tag filter → date sort
+  // Final posts = search results → tag filter → date sort
   const displayPosts = useMemo(() => {
     let posts = searchResults
-    if (collectionFilter) {
-      posts = posts.filter((p) => p.collection === collectionFilter)
-    }
     if (tagFilter) {
       posts = posts.filter((p) =>
         p.data.tags?.some(
@@ -83,7 +78,7 @@ function Search({ searchList, initialPosts, showCollectionFilter = false }) {
       )
     }
     return posts
-  }, [searchResults, collectionFilter, tagFilter, query])
+  }, [searchResults, tagFilter, query])
 
   // Tags available across ALL posts (not filtered) to keep the list stable
   const availableTags = useMemo(() => {
@@ -94,13 +89,10 @@ function Search({ searchList, initialPosts, showCollectionFilter = false }) {
     return [...tagSet].sort((a, b) => a.localeCompare(b))
   }, [searchList])
 
-  const toggleCollection = (col) =>
-    setCollectionFilter((prev) => (prev === col ? null : col))
-
   const toggleTag = (tag) =>
     setTagFilter((prev) => (prev === tag ? null : tag))
 
-  const hasActiveFilter = collectionFilter || tagFilter
+  const hasActiveFilter = Boolean(tagFilter)
 
   return (
     <div>
@@ -124,36 +116,6 @@ function Search({ searchList, initialPosts, showCollectionFilter = false }) {
           className="w-full outline-none focus:ring-0 dark:bg-neutral-900 dark:text-white"
         />
       </div>
-
-      {/* Collection filter */}
-      {showCollectionFilter && (
-        <div className="mt-4 flex items-center gap-2">
-          <button
-            onClick={() => toggleCollection('tech')}
-            className={cn(
-              'flex cursor-pointer items-center gap-1.5 rounded-md border px-3 py-1.5 text-sm transition-colors',
-              collectionFilter === 'tech'
-                ? 'border-emerald-500 bg-emerald-100 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-400'
-                : 'border-border text-muted-foreground hover:border-emerald-400 hover:text-emerald-600 dark:hover:text-emerald-400',
-            )}
-          >
-            <Code2 size={13} />
-            Tech
-          </button>
-          <button
-            onClick={() => toggleCollection('personal')}
-            className={cn(
-              'flex cursor-pointer items-center gap-1.5 rounded-md border px-3 py-1.5 text-sm transition-colors',
-              collectionFilter === 'personal'
-                ? 'border-violet-500 bg-violet-100 text-violet-700 dark:bg-violet-950/50 dark:text-violet-400'
-                : 'border-border text-muted-foreground hover:border-violet-400 hover:text-violet-600 dark:hover:text-violet-400',
-            )}
-          >
-            <BookOpen size={13} />
-            Personal
-          </button>
-        </div>
-      )}
 
       {/* Tag filter */}
       {availableTags.length > 0 && (

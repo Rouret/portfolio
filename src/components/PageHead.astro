@@ -1,24 +1,33 @@
 ---
 import { SITE } from '@/consts'
-import { getAllTechPosts } from '@/lib/data-utils'
+import { getAllArticles } from '@/lib/data-utils'
+import { truncateOnWordBoundary } from '@/lib/utils'
 interface Props {
   title?: string
   description?: string
+  includeBlogList?: boolean
 }
 
-const { title = SITE.title, description = SITE.description } = Astro.props
+const {
+  title = SITE.title,
+  description = SITE.description,
+  includeBlogList = false,
+} = Astro.props
 const image = new URL('/ogImage.png', Astro.site).toString()
-const posts = await getAllTechPosts()
+const posts = includeBlogList ? await getAllArticles() : []
 
-// Optimize description for SEO (50-155 chars)
-const descTrimmed = description.trim()
-const optimizedDescription =
-  descTrimmed.length > 155 ? descTrimmed.slice(0, 152) + '...' : descTrimmed
+// Optimize description for SEO (50-155 chars), truncated on a word boundary
+const optimizedDescription = truncateOnWordBoundary(description.trim(), 152)
 
-// Create proper page title, clamp to ~60 chars
-const rawTitle = title === SITE.title ? SITE.title : `${title} | ${SITE.title}`
+// Create proper page title, clamp to ~60 chars while preserving the site suffix
+const suffix = ` | ${SITE.title}`
+const maxTitleLen = 60 - suffix.length
 const pageTitle =
-  rawTitle.length > 60 ? rawTitle.slice(0, 57) + '...' : rawTitle
+  title === SITE.title
+    ? SITE.title
+    : title.length > maxTitleLen
+      ? `${truncateOnWordBoundary(title, maxTitleLen)}${suffix}`
+      : `${title}${suffix}`
 ---
 
 <title>{pageTitle}</title>
@@ -65,12 +74,12 @@ const pageTitle =
     '@id': `${SITE.href}#website`,
     url: SITE.href,
     name: SITE.title,
-    description: optimizedDescription,
+    // Always the canonical site description, not the current page's — this
+    // node's @id is shared across every page, so its properties must not vary.
+    description: SITE.description,
     inLanguage: SITE.locale,
     publisher: {
-      '@type': 'Person',
-      name: SITE.author,
-      url: SITE.href,
+      '@id': `${SITE.href}/#person`,
     },
     potentialAction: {
       '@type': 'SearchAction',
@@ -88,21 +97,21 @@ const pageTitle =
         'Technology blog covering web development, programming, and software engineering topics',
       url: `${SITE.href}/blog`,
       author: {
-        '@type': 'Person',
-        name: SITE.author,
+        '@id': `${SITE.href}/#person`,
       },
-      blogPost: posts.slice(0, 10).map((post) => ({
-        '@type': 'BlogPosting',
-        headline: post.data.title,
-        description: post.data.description,
-        url: `${SITE.href}/blog/${post.collection}/${post.id}/`,
-        datePublished: post.data.date.toISOString(),
-        author: {
-          '@type': 'Person',
-          name: post.data.authors ? post.data.authors[0] : SITE.author,
-        },
-        keywords: post.data.tags ? post.data.tags.join(', ') : '',
-      })),
+      ...(posts.length > 0 && {
+        blogPost: posts.slice(0, 10).map((post) => ({
+          '@type': 'BlogPosting',
+          headline: post.data.title,
+          description: post.data.description,
+          url: `${SITE.href}/articles/${post.slug}/`,
+          datePublished: post.data.date.toISOString(),
+          author: {
+            '@id': `${SITE.href}/#person`,
+          },
+          keywords: post.data.tags ? post.data.tags.join(', ') : '',
+        })),
+      }),
     },
   })}
 />

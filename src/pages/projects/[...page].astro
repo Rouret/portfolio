@@ -24,7 +24,11 @@ const currentUrl = Astro.url
 ---
 
 <Layout canonicalUrl={currentUrl}>
-  <PageHead slot="head" title="Projects" />
+  <PageHead
+    slot="head"
+    title="Projects"
+    description="A showcase of personal software projects by Lucas Rouret, spanning mobile apps, web apps, and side projects."
+  />
   <Breadcrumbs
     items={[{ label: 'Projects', href: '/projects', icon: 'lucide:folder' }]}
   />

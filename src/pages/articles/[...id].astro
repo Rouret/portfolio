@@ -8,13 +8,13 @@ import { badgeVariants } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
 import Layout from '@/layouts/Layout.astro'
-import { getAdjacentPersonalPosts, getAllPersonalPosts } from '@/lib/data-utils'
-import { formatDate, readingTime } from '@/lib/utils'
+import { getAdjacentArticles, getAllArticles } from '@/lib/data-utils'
+import { formatDate, readingTime, slugifyTag } from '@/lib/utils'
 import { Icon } from 'astro-icon/components'
 import { render } from 'astro:content'
 
 export async function getStaticPaths() {
-  const posts = await getAllPersonalPosts()
+  const posts = await getAllArticles()
   return posts.map((post) => ({
     params: { id: post.slug },
     props: post,
@@ -25,42 +25,19 @@ const post = Astro.props
 const currentPostSlug = Astro.params.id
 
 const { Content, headings } = await render(post)
-const { next, prev } = await getAdjacentPersonalPosts(currentPostSlug)
+const { next, prev } = await getAdjacentArticles(currentPostSlug)
 
-const structuredData = {
-  '@context': 'https://schema.org',
-  '@type': 'BlogPosting',
-  headline: post.data.title,
-  datePublished: post.data.date,
-  dateModified: post.data.date,
-  author: {
-    '@type': 'Person',
-    name: post.data.authors ? post.data.authors[0] : 'Author',
-  },
-  image: new URL(`/image/${post.slug}.png`, Astro.site).toString(),
-  keywords: post.data.tags ? post.data.tags.join(', ') : '',
-  description: post.data.description || '',
-}
-const canonicalUrl = new URL(
-  `/blog/${post.collection}/${post.slug}/`,
-  Astro.site
-).toString()
+const canonicalUrl = new URL(`/articles/${post.slug}/`, Astro.site).toString()
 ---
 
 <Layout canonicalUrl={canonicalUrl}>
   <PostHead slot="head" post={post} />
 
-  <script
-    type="application/ld+json"
-    is:inline
-    set:html={JSON.stringify(structuredData)}
-  />
   <section class="flex flex-col gap-y-6">
     <div class="col-start-2">
       <Breadcrumbs
         items={[
           { href: '/blog', label: 'Blog', icon: 'lucide:archive' },
-          { label: 'Blog', href: '/blog', icon: 'lucide:folder-open' },
           { label: post.data.title, icon: 'lucide:file-text' },
         ]}
       />
@@ -78,7 +55,7 @@ const canonicalUrl = new URL(
             post.data.tags && post.data.tags.length > 0 ? (
               post.data.tags.map((tag) => (
                 <a
-                  href={`/tags/${tag}`}
+                  href={`/tags/${slugifyTag(tag)}`}
                   class={badgeVariants({ variant: 'secondary' })}
                 >
                   <Icon name="lucide:hash" class="size-3" />
@@ -103,7 +80,9 @@ const canonicalUrl = new URL(
         <Separator orientation="vertical" className="h-4!" />
         <span>{readingTime(post.body!)}</span>
         <Separator orientation="vertical" className="h-4!" />
-        <span>By Lucas Rouret</span>
+        <span>
+          By <a href="/" class="hover:text-foreground underline">Lucas Rouret</a>
+        </span>
       </div>
     </div>
 
@@ -130,7 +109,7 @@ const canonicalUrl = new URL(
 
       <div class="flex flex-wrap gap-2">
         <Link
-          href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(Astro.site + 'blog/personal/' + post.slug)}`}
+          href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(Astro.site + 'articles/' + post.slug)}`}
           target="_blank"
           rel="noopener noreferrer"
           title="Share on Facebook"
@@ -141,7 +120,7 @@ const canonicalUrl = new URL(
           </Button>
         </Link>
         <Link
-          href={`https://twitter.com/intent/tweet?url=${encodeURIComponent(Astro.site + 'blog/personal/' + post.slug)}`}
+          href={`https://twitter.com/intent/tweet?url=${encodeURIComponent(Astro.site + 'articles/' + post.slug)}`}
           target="_blank"
           rel="noopener noreferrer"
           title="Share on Twitter"
@@ -152,7 +131,7 @@ const canonicalUrl = new URL(
           </Button>
         </Link>
         <Link
-          href={`https://www.linkedin.com/shareArticle?mini=true&url=${encodeURIComponent(Astro.site + 'blog/personal/' + post.slug)}`}
+          href={`https://www.linkedin.com/shareArticle?mini=true&url=${encodeURIComponent(Astro.site + 'articles/' + post.slug)}`}
           target="_blank"
           rel="noopener noreferrer"
           title="Share on LinkedIn"
@@ -163,7 +142,7 @@ const canonicalUrl = new URL(
           </Button>
         </Link>
         <Link
-          href={`https://www.reddit.com/submit?url=${encodeURIComponent(Astro.site + 'blog/personal/' + post.slug)}`}
+          href={`https://www.reddit.com/submit?url=${encodeURIComponent(Astro.site + 'articles/' + post.slug)}`}
           target="_blank"
           rel="noopener noreferrer"
           title="Share on Reddit"
@@ -174,7 +153,7 @@ const canonicalUrl = new URL(
           </Button>
         </Link>
         <Link
-          href={`https://wa.me/?text=${encodeURIComponent(Astro.site + 'blog/personal/' + post.slug)}`}
+          href={`https://wa.me/?text=${encodeURIComponent(Astro.site + 'articles/' + post.slug)}`}
           target="_blank"
           rel="noopener noreferrer"
           title="Share on WhatsApp"
@@ -185,7 +164,7 @@ const canonicalUrl = new URL(
           </Button>
         </Link>
         <Link
-          href={`https://t.me/share/url?url=${encodeURIComponent(Astro.site + 'blog/personal/' + post.slug)}`}
+          href={`https://t.me/share/url?url=${encodeURIComponent(Astro.site + 'articles/' + post.slug)}`}
           target="_blank"
           rel="noopener noreferrer"
           title="Share on Telegram"
@@ -196,7 +175,7 @@ const canonicalUrl = new URL(
           </Button>
         </Link>
         <Link
-          href={`https://pinterest.com/pin/create/button/?url=${encodeURIComponent(Astro.site + 'blog/personal/' + post.slug)}`}
+          href={`https://pinterest.com/pin/create/button/?url=${encodeURIComponent(Astro.site + 'articles/' + post.slug)}`}
           target="_blank"
           rel="noopener noreferrer"
           title="Share on Pinterest"
@@ -242,7 +221,7 @@ const canonicalUrl = new URL(
 
           scrollToTopButton.classList.toggle(
             'hidden',
-            window.scrollY <= 300 || isFooterVisible
+            window.scrollY <= 300 || isFooterVisible,
           )
         })
       }

@@ -3,19 +3,18 @@ import Link from '@/components/Link.astro'
 import { buttonVariants } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { Icon } from 'astro-icon/components'
-import type { CollectionEntry } from 'astro:content'
+import type { ArticleWithSlug } from '@/lib/data-utils'
 
 interface Props {
-  prevPost: CollectionEntry<'tech' | 'personal'> | null
-  nextPost: CollectionEntry<'tech' | 'personal'> | null
+  prevPost: ArticleWithSlug | null
+  nextPost: ArticleWithSlug | null
 }
 const { prevPost, nextPost } = Astro.props
-const collectionName = prevPost?.collection
 ---
 
 <nav class="col-start-2 grid grid-cols-1 gap-4 sm:grid-cols-2">
   <Link
-    href={prevPost ? `/blog/${collectionName}/${prevPost.id}/` : '#'}
+    href={prevPost ? `/articles/${prevPost.slug}/` : '#'}
     class={cn(
       buttonVariants({ variant: 'outline' }),
       'rounded-xl group flex items-center justify-start size-full',
@@ -35,7 +34,7 @@ const collectionName = prevPost?.collection
     </div>
   </Link>
   <Link
-    href={nextPost ? `/blog/${collectionName}/${nextPost.id}/` : '#'}
+    href={nextPost ? `/articles/${nextPost.slug}/` : '#'}
     class={cn(
       buttonVariants({ variant: 'outline' }),
       'rounded-xl group flex items-center justify-end size-full',

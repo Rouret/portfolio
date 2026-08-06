@@ -20,13 +20,17 @@ export function readingTime(html: string) {
   return `${readingTimeMinutes} min read`
 }
 
-export function generateSlug(title: string): string {
-  return title
+export function slugifyTag(tag: string) {
+  return tag
     .toLowerCase()
-    .normalize('NFD') // Normalise les caractères accentués
-    .replace(/[\u0300-\u036f]/g, '') // Supprime les accents
-    .replace(/[^a-z0-9\s-]/g, '') // Supprime les caractères spéciaux
     .trim()
-    .replace(/\s+/g, '-') // Remplace les espaces par des tirets
-    .replace(/-+/g, '-') // Supprime les tirets multiples
+    .replace(/\s+/g, '-')
 }
+
+export function truncateOnWordBoundary(text: string, maxLength: number) {
+  if (text.length <= maxLength) return text
+  const truncated = text.slice(0, maxLength)
+  const lastSpace = truncated.lastIndexOf(' ')
+  return `${truncated.slice(0, lastSpace > 0 ? lastSpace : maxLength)}…`
+}
+

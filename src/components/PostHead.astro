@@ -1,40 +1,34 @@
 ---
 import { SITE } from '@/consts'
-import type { CollectionEntry } from 'astro:content'
+import type { ArticleWithSlug } from '@/lib/data-utils'
+import { truncateOnWordBoundary } from '@/lib/utils'
 
 interface Props {
-  post: CollectionEntry<'tech' | 'personal'>
+  post: ArticleWithSlug
 }
 
 const { post } = Astro.props
 
-const collectionName = post.collection
-
 const title = post.data.title || SITE.title
 const description = post.data.description || SITE.description
-const postUrl = new URL(
-  `/blog/${collectionName}/${post.id}/`,
-  SITE.href,
-).toString()
-const image = new URL(`/image/${post.id}.png`, SITE.href).toString()
+const postUrl = new URL(`/articles/${post.slug}/`, SITE.href).toString()
+const image = new URL(`/image/${post.slug}.png`, SITE.href).toString()
 const author = post.data.authors ? post.data.authors.join(', ') : SITE.author
+const dateModified = post.data.updatedDate || post.data.date
 
-// Optimize description for SEO (50-155 chars)
-const descTrimmed = description.trim()
-const optimizedDescription =
-  descTrimmed.length > 155 ? descTrimmed.slice(0, 152) + '...' : descTrimmed
+// Optimize description for SEO (50-155 chars), truncated on a word boundary
+const optimizedDescription = truncateOnWordBoundary(description.trim(), 152)
 
-// Compose seo title, clamp near 60 chars
-const baseSeoTitle = `${title} - ${SITE.title}`
+// Compose seo title, clamp near 60 chars while preserving the site suffix
+const suffix = ` - ${SITE.title}`
+const maxTitleLen = 60 - suffix.length
 const seoTitle =
-  baseSeoTitle.length > 60 ? baseSeoTitle.slice(0, 57) + '...' : baseSeoTitle
-const postUrlWithoutTrailingSlash = postUrl.endsWith('/')
-  ? postUrl.slice(0, -1)
-  : postUrl
-const postCanonicalUrl = new URL(
-  postUrlWithoutTrailingSlash,
-  SITE.href,
-).toString()
+  title.length > maxTitleLen
+    ? `${truncateOnWordBoundary(title, maxTitleLen)}${suffix}`
+    : `${title}${suffix}`
+// Keep the trailing slash to match the sitemap and the rest of the site —
+// previously this stripped it, creating a duplicate-content URL pair.
+const postCanonicalUrl = postUrl
 ---
 
 <title>{seoTitle}</title>
@@ -68,6 +62,7 @@ const postCanonicalUrl = new URL(
   property="article:published_time"
   content={post.data.date.toISOString()}
 />
+<meta property="article:modified_time" content={dateModified.toISOString()} />
 <meta property="article:author" content={author} />
 <meta property="article:publisher" content={SITE.title} />
 <meta property="article:section" content="Technology" />
@@ -109,7 +104,7 @@ const postCanonicalUrl = new URL(
       width: 1200,
       height: 630,
     },
-    author: {
+    author: author === SITE.author ? { '@id': `${SITE.href}/#person` } : {
       '@type': 'Person',
       name: author,
       url: SITE.href,
@@ -126,7 +121,7 @@ const postCanonicalUrl = new URL(
       },
     },
     datePublished: post.data.date.toISOString(),
-    dateModified: post.data.date.toISOString(),
+    dateModified: dateModified.toISOString(),
     mainEntityOfPage: {
       '@type': 'WebPage',
       '@id': postUrl,
@@ -136,7 +131,7 @@ const postCanonicalUrl = new URL(
     inLanguage: SITE.locale,
     isPartOf: {
       '@type': 'Blog',
-      '@id': new URL('/blog/', SITE.href).toString(),
+      '@id': `${SITE.href}/blog#blog`,
       name: `${SITE.title} Blog`,
     },
     about: post?.data.tags

@@ -1,27 +1,26 @@
 import { getCollection, type CollectionEntry } from 'astro:content'
-import { generateSlug } from './utils'
 
-export type PersonalPostWithSlug = CollectionEntry<'personal'> & {
+export type ArticleWithSlug = CollectionEntry<'articles'> & {
   slug: string
 }
 
-const filterPersonalPosts = (
-  posts: CollectionEntry<'personal'>[],
-): PersonalPostWithSlug[] => {
+const filterArticles = (
+  posts: CollectionEntry<'articles'>[],
+): ArticleWithSlug[] => {
   return posts
     .filter((post) => !post.data.draft)
     .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())
     .map((post) => ({
       ...post,
-      slug: post.data.slug || generateSlug(post.data.title),
+      slug: post.data.slug || post.id,
     }))
 }
 
-const filterRecentPersonalPosts = (
-  posts: PersonalPostWithSlug[],
+const filterRecentArticles = (
+  posts: ArticleWithSlug[],
   count: number,
-): PersonalPostWithSlug[] => {
-  const postsByDay = posts.reduce<Record<string, PersonalPostWithSlug[]>>(
+): ArticleWithSlug[] => {
+  const postsByDay = posts.reduce<Record<string, ArticleWithSlug[]>>(
     (acc, post) => {
       const key = getDayKey(post.data.date)
       if (!acc[key]) {
@@ -48,31 +47,29 @@ export function getDayKey(date: string | Date): string {
   return d.toISOString().split('T')[0]
 }
 
-// ------------------------------ All posts ------------------------------
+// ------------------------------ All articles ------------------------------
 
-export const getAllPersonalPosts = async (): Promise<
-  PersonalPostWithSlug[]
-> => {
-  const posts = await getCollection('personal')
-  return filterPersonalPosts(posts)
+export const getAllArticles = async (): Promise<ArticleWithSlug[]> => {
+  const posts = await getCollection('articles')
+  return filterArticles(posts)
 }
 
-// ------------------------------ Recent posts ------------------------------
+// ------------------------------ Recent articles ------------------------------
 
-export async function getRecentPersonalPosts(
+export async function getRecentArticles(
   count: number,
-): Promise<PersonalPostWithSlug[]> {
-  const posts = await getAllPersonalPosts()
-  return filterRecentPersonalPosts(posts, count)
+): Promise<ArticleWithSlug[]> {
+  const posts = await getAllArticles()
+  return filterRecentArticles(posts, count)
 }
 
-// ------------------------------ Adjacent posts ------------------------------
+// ------------------------------ Adjacent articles ------------------------------
 
-export async function getAdjacentPersonalPosts(currentSlug: string): Promise<{
-  prev: PersonalPostWithSlug | null
-  next: PersonalPostWithSlug | null
+export async function getAdjacentArticles(currentSlug: string): Promise<{
+  prev: ArticleWithSlug | null
+  next: ArticleWithSlug | null
 }> {
-  const posts = await getAllPersonalPosts()
+  const posts = await getAllArticles()
   const currentIndex = posts.findIndex((post) => post.slug === currentSlug)
 
   if (currentIndex === -1) {
@@ -85,8 +82,10 @@ export async function getAdjacentPersonalPosts(currentSlug: string): Promise<{
   }
 }
 
-export async function getAllPersonalTags(): Promise<Map<string, number>> {
-  const posts = await getAllPersonalPosts()
+// ------------------------------ Tags ------------------------------
+
+export async function getAllTags(): Promise<Map<string, number>> {
+  const posts = await getAllArticles()
 
   return posts.reduce((acc, post) => {
     post.data.tags?.forEach((tag: string) => {
@@ -96,10 +95,10 @@ export async function getAllPersonalTags(): Promise<Map<string, number>> {
   }, new Map<string, number>())
 }
 
-export async function getSortedPersonalTags(): Promise<
+export async function getSortedTags(): Promise<
   { tag: string; count: number }[]
 > {
-  const tagCounts = await getAllPersonalTags()
+  const tagCounts = await getAllTags()
 
   return [...tagCounts.entries()]
     .map(([tag, count]) => ({ tag, count }))
@@ -109,129 +108,31 @@ export async function getSortedPersonalTags(): Promise<
     })
 }
 
-export function groupPersonalPostsByYear(
-  posts: PersonalPostWithSlug[],
-): Record<string, PersonalPostWithSlug[]> {
-  return posts.reduce((acc: Record<string, PersonalPostWithSlug[]>, post) => {
+export async function getArticlesByTag(tag: string): Promise<ArticleWithSlug[]> {
+  const posts = await getAllArticles()
+  return posts.filter((post) => post.data.tags?.includes(tag))
+}
+
+// ------------------------------ Authors / grouping ------------------------------
+
+export function groupArticlesByYear(
+  posts: ArticleWithSlug[],
+): Record<string, ArticleWithSlug[]> {
+  return posts.reduce((acc: Record<string, ArticleWithSlug[]>, post) => {
     const year = post.data.date.getFullYear().toString()
     ;(acc[year] ??= []).push(post)
     return acc
   }, {})
 }
 
-export async function getPersonalPostsByAuthor(
+export async function getArticlesByAuthor(
   authorId: string,
-): Promise<PersonalPostWithSlug[]> {
-  const posts = await getAllPersonalPosts()
+): Promise<ArticleWithSlug[]> {
+  const posts = await getAllArticles()
   return posts.filter((post) => post.data.authors?.includes(authorId))
 }
 
-export async function getPersonalPostsByTag(
-  tag: string,
-): Promise<PersonalPostWithSlug[]> {
-  const posts = await getAllPersonalPosts()
-  return posts.filter((post) => post.data.tags?.includes(tag))
-}
-
-export type TechPostWithSlug = CollectionEntry<'tech'> & {
-  slug: string
-}
-
-const filterTechPosts = (
-  posts: CollectionEntry<'tech'>[],
-): TechPostWithSlug[] => {
-  return posts
-    .filter((post) => !post.data.draft)
-    .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())
-    .map((post) => ({
-      ...post,
-      slug: post.data.slug || generateSlug(post.data.title),
-    }))
-}
-
-const filterRecentTechPosts = (
-  posts: TechPostWithSlug[],
-  count: number,
-): TechPostWithSlug[] => {
-  const postsByDay = posts.reduce<Record<string, TechPostWithSlug[]>>(
-    (acc, post) => {
-      const key = getDayKey(post.data.date)
-      if (!acc[key]) {
-        acc[key] = []
-      }
-      acc[key].push(post)
-      return acc
-    },
-    {},
-  )
-
-  const randomPostsPerDay = Object.values(postsByDay).map((postsForDay) => {
-    const randomIndex = Math.floor(Math.random() * postsForDay.length)
-    return postsForDay[randomIndex]
-  })
-
-  const shuffled = randomPostsPerDay.sort(() => Math.random() - 0.5)
-
-  return shuffled.slice(0, count)
-}
-
-export const getAllTechPosts = async (): Promise<TechPostWithSlug[]> => {
-  const posts = await getCollection('tech')
-  return filterTechPosts(posts)
-}
-
-export async function getRecentTechPosts(
-  count: number,
-): Promise<TechPostWithSlug[]> {
-  const posts = await getAllTechPosts()
-  return filterRecentTechPosts(posts, count)
-}
-
-export async function getAdjacentTechPosts(currentSlug: string): Promise<{
-  prev: TechPostWithSlug | null
-  next: TechPostWithSlug | null
-}> {
-  const posts = await getAllTechPosts()
-  const currentIndex = posts.findIndex((post) => post.slug === currentSlug)
-
-  if (currentIndex === -1) {
-    return { prev: null, next: null }
-  }
-
-  return {
-    next: currentIndex > 0 ? posts[currentIndex - 1] : null,
-    prev: currentIndex < posts.length - 1 ? posts[currentIndex + 1] : null,
-  }
-}
-
-export async function getAllTechTags(): Promise<Map<string, number>> {
-  const posts = await getAllTechPosts()
-
-  return posts.reduce((acc, post) => {
-    post.data.tags?.forEach((tag: string) => {
-      acc.set(tag, (acc.get(tag) || 0) + 1)
-    })
-    return acc
-  }, new Map<string, number>())
-}
-
-export async function getSortedTechTags(): Promise<
-  { tag: string; count: number }[]
-> {
-  const tagCounts = await getAllTechTags()
-
-  return [...tagCounts.entries()]
-    .map(([tag, count]) => ({ tag, count }))
-    .sort((a, b) => {
-      const countDiff = b.count - a.count
-      return countDiff !== 0 ? countDiff : a.tag.localeCompare(b.tag)
-    })
-}
-
-export async function getTechPostsByTag(tag: string): Promise<TechPostWithSlug[]> {
-  const posts = await getAllTechPosts()
-  return posts.filter((post) => post.data.tags?.includes(tag))
-}
+// ------------------------------ Projects ------------------------------
 
 export async function getAllProjects(): Promise<CollectionEntry<'projects'>[]> {
   const projects = await getCollection('projects')

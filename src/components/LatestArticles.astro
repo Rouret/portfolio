@@ -2,9 +2,9 @@
 import Link from '@/components/Link.astro'
 import BlogCard from '@/components/react/blog-card'
 import { buttonVariants } from '@/components/ui/button'
-import { getRecentTechPosts } from '@/lib/data-utils'
+import { getRecentArticles } from '@/lib/data-utils'
 
-const blog = await getRecentTechPosts(3)
+const articles = await getRecentArticles(3)
 ---
 
 <section
@@ -16,33 +16,27 @@ const blog = await getRecentTechPosts(3)
     <h2
       id="latest-posts-title"
       class="font-custom text-foreground text-2xl font-bold"
-      title="sharing technical knowledge and discoveries"
-      aria-label="sharing technical knowledge and discoveries"
+      title="latest writing"
+      aria-label="latest writing"
     >
-      Latest Tech Blog Posts
+      Latest Writing
     </h2>
-    <p class="text-muted-foreground text-sm" aria-label="tech blog description">
-      I believe in learning by sharing. Here's what I've discovered,
-      experimented with, and learned along my technical journey.
+    <p class="text-muted-foreground text-sm" aria-label="blog description">
+      Technical discoveries and personal reflections, sharing what I learn
+      along the way.
     </p>
   </div>
   <ul class="flex flex-col gap-y-4">
     {
-      blog.map((post, index) => (
+      articles.map((post, index) => (
         <li>
           <BlogCard entry={post} isLatest={index === 0} />
         </li>
       ))
     }
   </ul>
-  <div
-    class="flex justify-center"
-    aria-label="discover more technical learnings"
-  >
-    <Link
-      href="/blog"
-      class={buttonVariants({ variant: 'ghost' }) + ' group'}
-    >
+  <div class="flex justify-center" aria-label="discover more writing">
+    <Link href="/blog" class={buttonVariants({ variant: 'ghost' }) + ' group'}>
       Discover more learnings <span
         class="ml-1.5 transition-transform group-hover:translate-x-1"
         >&rarr;</span

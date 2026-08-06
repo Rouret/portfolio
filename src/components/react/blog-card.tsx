@@ -1,24 +1,16 @@
 import { Badge } from '@/components/ui/badge'
-import type { PersonalPostWithSlug } from '@/lib/data-utils'
+import type { ArticleWithSlug } from '@/lib/data-utils'
 import { formatDate } from '@/lib/utils'
-import type { CollectionEntry } from 'astro:content'
-import { BookOpen, Calendar, Code2, Hash } from 'lucide-react'
+import { Calendar, Hash } from 'lucide-react'
 
 const BlogCardJSX = ({
   entry,
   isLatest,
 }: {
-  /*  */ entry: CollectionEntry<'tech'> | PersonalPostWithSlug
+  entry: ArticleWithSlug
   isLatest: boolean
 }) => {
-  const getPostUrl = () => {
-    if (entry.collection === 'personal') {
-      return `/blog/${entry.collection}/${(entry as PersonalPostWithSlug).slug}`
-    }
-    return `/blog/${entry.collection}/${entry.id}`
-  }
-
-  const isTech = entry.collection === 'tech'
+  const getPostUrl = () => `/articles/${entry.slug}`
 
   return (
     <div
@@ -38,16 +30,6 @@ const BlogCardJSX = ({
         <div className="grow">
           <div className="mb-1 flex items-start justify-between gap-2">
             <h3 className="text-lg font-medium leading-snug">{entry.data.title}</h3>
-            <span
-              className={`mt-0.5 shrink-0 rounded-md p-1 ${
-                isTech
-                  ? 'bg-emerald-100 text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400'
-                  : 'bg-violet-100 text-violet-600 dark:bg-violet-950/40 dark:text-violet-400'
-              }`}
-              title={isTech ? 'Tech' : 'Personal'}
-            >
-              {isTech ? <Code2 size={13} /> : <BookOpen size={13} />}
-            </span>
           </div>
           <div className="mb-2 flex items-center gap-2">
             <Calendar size={14} className="text-muted-foreground" />

@@ -1,11 +1,11 @@
 ---
-import LastPersonalBlogPosts from '@/components/LastPersonalBlogPosts.astro'
-import LastTechBlogPosts from '@/components/LastTechBlogPosts.astro'
+import LatestArticles from '@/components/LatestArticles.astro'
 import PageHead from '@/components/PageHead.astro'
-import Skills from '@/components/react/skills'
+import NotesExplorer from '@/components/react/notes-explorer'
 import { SITE } from '@/consts'
 import Layout from '@/layouts/Layout.astro'
-import { getAllProjects } from '@/lib/data-utils'
+import { getAllArticles, getAllProjects } from '@/lib/data-utils'
+import { notesTree } from '@/lib/notes'
 import { Icon } from 'astro-icon/components'
 import { Image } from 'astro:assets'
 
@@ -14,6 +14,7 @@ import me from '../assets/me.jpg'
 const currentUrl = Astro.url
 const projects = await getAllProjects()
 const currentProject = projects.find((project) => project.id === 'lyn-meteo')
+const allArticles = await getAllArticles()
 ---
 
 <Layout canonicalUrl={currentUrl}>
@@ -88,28 +89,6 @@ const currentProject = projects.find((project) => project.id === 'lyn-meteo')
       </div>
     </div>
 
-    <section class="relative" aria-labelledby="skills-title">
-      <h2
-        id="skills-title"
-        class="font-custom text-foreground text-2xl font-bold"
-        title="skills"
-        aria-label="skills"
-        role="heading"
-      >
-        Current Job
-      </h2>
-      <p class="text-muted-foreground text-sm" aria-label="skills description">
-        I graduated in 2023 and work full-time as a software engineer at
-        <a
-          href="https://apps.theodo.com/a-propos"
-          target="_blank"
-          class="text-primary">Theodo Apps</a
-        >. I am seeking full remote opportunities as a solo developer or with a
-        team that wants to learn from their mistakes
-      </p>
-      <div></div>
-    </section>
-
     {
       currentProject && (
         <section class="relative" aria-labelledby="current-project-title">
@@ -126,8 +105,8 @@ const currentProject = projects.find((project) => project.id === 'lyn-meteo')
             class="text-muted-foreground text-sm"
             aria-label="current project description"
           >
-            Outside of my day job, this is the project I'm currently pouring
-            my time into.
+            Outside of my day job, this is the project I'm currently pouring my
+            time into.
           </p>
           <a
             href={`/projects/${currentProject.id}`}
@@ -172,28 +151,21 @@ const currentProject = projects.find((project) => project.id === 'lyn-meteo')
       )
     }
 
-    <section class="relative" aria-labelledby="skills-title">
-      <h2
-        id="skills-title"
-        class="font-custom text-foreground text-2xl font-bold"
-        title="skills"
-        aria-label="skills"
-        role="heading"
-      >
-        Skills & Technologies
-      </h2>
-      <p class="text-muted-foreground text-sm" aria-label="skills description">
-        My professional projects have been primarily built with these
-        technologies. I'm always eager to learn and adapt, and I also have
-        experience with other tools such as: Python, NestJS, ElysiaJS, Spring
-        Boot.
-      </p>
-      <div>
-        <Skills client:load />
-      </div>
-    </section>
+    <LatestArticles />
 
-    <LastTechBlogPosts />
-    <LastPersonalBlogPosts />
+    <section class="flex flex-col gap-y-4" aria-labelledby="notes-title">
+      <div>
+        <h2
+          id="notes-title"
+          class="font-custom text-foreground text-2xl font-bold"
+        >
+          Explore by Topic
+        </h2>
+        <p class="text-muted-foreground text-sm">
+          Articles grouped around the subjects I keep coming back to.
+        </p>
+      </div>
+      <NotesExplorer client:load notes={notesTree} articles={allArticles} />
+    </section>
   </section>
 </Layout>

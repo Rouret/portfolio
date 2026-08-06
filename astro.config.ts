@@ -48,6 +48,11 @@ function rehypeDemoteH1AndStripTitle() {
 export default defineConfig({
   site: 'https://www.lucas-rouret.fr',
 
+  redirects: {
+    '/blog/tech/[...id]': '/articles/[...id]',
+    '/blog/personal/[...id]': '/articles/[...id]',
+  },
+
   integrations: [expressiveCode({
     themes: ['catppuccin-latte', 'ayu-dark'],
     plugins: [pluginCollapsibleSections(), pluginLineNumbers()],

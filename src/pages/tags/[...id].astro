@@ -4,18 +4,19 @@ import PageHead from '@/components/PageHead.astro'
 import BlogCard from '@/components/react/blog-card'
 import Layout from '@/layouts/Layout.astro'
 
-import { getAllTechTags, getTechPostsByTag } from '@/lib/data-utils'
+import { getAllTags, getArticlesByTag } from '@/lib/data-utils'
+import { slugifyTag } from '@/lib/utils'
 import { Icon } from 'astro-icon/components'
 
 export async function getStaticPaths() {
-  const tagMap = await getAllTechTags()
+  const tagMap = await getAllTags()
   const uniqueTags = Array.from(tagMap.keys())
 
   return Promise.all(
     uniqueTags.map(async (tag) => {
-      const posts = await getTechPostsByTag(tag)
+      const posts = await getArticlesByTag(tag)
       return {
-        params: { id: tag },
+        params: { id: slugifyTag(tag) },
         props: {
           tag,
           posts,

@@ -4,15 +4,19 @@ import Link from '@/components/Link.astro'
 import PageHead from '@/components/PageHead.astro'
 import { badgeVariants } from '@/components/ui/badge'
 import Layout from '@/layouts/Layout.astro'
-import { getSortedTechTags } from '@/lib/data-utils'
+import { getSortedTags } from '@/lib/data-utils'
 import { Icon } from 'astro-icon/components'
 
-const sortedTags = await getSortedTechTags()
+const sortedTags = await getSortedTags()
 const currentUrl = Astro.url
 ---
 
 <Layout canonicalUrl={currentUrl}>
-  <PageHead slot="head" title="Tags" />
+  <PageHead
+    slot="head"
+    title="Tags"
+    description="Browse all article topics and tags on Lucas Rouret's blog."
+  />
   <Breadcrumbs items={[{ label: 'Tags', icon: 'lucide:tags' }]} />
 
   <h1 class="mb-4 text-3xl font-bold">Tags</h1>

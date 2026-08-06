@@ -1,0 +1,182 @@
+---
+title: 'Keeping Expo Router tabBarBadge in Sync Across Your App'
+description: "Expo Router's tabBarBadge works well for a static value, but keeping it in sync with unread messages, notifications, or a cart count updated from another screen is a different problem. Here's the architecture I use to make tab badges reactive with Zustand, without turning the navigation layout into a stakeholder in business logic."
+date: 2026-08-06
+tags:
+  - 'React Native'
+  - 'Expo'
+  - 'Zustand'
+authors:
+  - 'Lucas Rouret'
+updatedDate: 2026-08-06
+---
+
+Expo Router lets you define a static `tabBarBadge`, but keeping that badge, an unread badge, a notification badge, a cart count, in sync with state that changes from another screen is less obvious. If you've searched for why your Expo Router badge isn't updating, the usual mistake is treating this as a navigation problem. It isn't. It's a state ownership problem: the badge isn't the state, it's only another view of the state.
+
+## The architecture
+
+```
+      Events (WebSocket / Push / Mutation)
+                     │
+                     ▼
+               Zustand Store
+      { badges: { messages: 4, cart: 1 } }
+                     │
+                     ▼
+       Selector: badges.messages
+                     │
+                     ▼
+        TabBarIcon("messages")
+                     │
+                     ▼
+          _layout.tsx (static)
+```
+
+Data flows down from whatever produces it into a store, through a selector, into the icon that displays it. `_layout.tsx` sits at the bottom of that flow: it declares the tab once and never reads badge state, so badge updates alone don't trigger a re-render there.
+
+> **Good fit**
+>
+> - unread messages, notification badges, cart counts
+> - counters updated from background sync
+>
+> **Not a good fit**
+>
+> - a static badge that never changes after mount
+> - server state already owned by React Query (read it from the query instead of duplicating it)
+
+## Why this architecture
+
+`tabBarBadge` is evaluated as part of `options` in `_layout.tsx`. Making it reactive the naive way means the layout has to know about unread counts, WebSocket events, or push payloads, none of which are navigation concerns.
+
+The fix is to give badge state a single owner outside the component tree, and let every consumer subscribe only to the slice it needs:
+
+- Reads and writes are separate. A screen never needs to render to update a badge it doesn't own.
+- Each tab subscribes to its own key, so updating one badge doesn't re-render the others.
+- The tab bar stops being a stakeholder in business logic. It just displays a number someone else owns.
+
+## The code
+
+**Store**, badges indexed by tab name:
+
+```typescript
+// store/tabBadgeStore.ts
+import { create } from 'zustand'
+
+type TabBadgeState = {
+  badges: Record<string, number>
+  setBadge: (tab: string, count: number) => void
+  incrementBadge: (tab: string, by?: number) => void
+  clearBadge: (tab: string) => void
+}
+
+export const useTabBadgeStore = create<TabBadgeState>((set) => ({
+  badges: {},
+  setBadge: (tab, count) =>
+    set((state) => ({ badges: { ...state.badges, [tab]: count } })),
+  incrementBadge: (tab, by = 1) =>
+    set((state) => ({
+      badges: { ...state.badges, [tab]: (state.badges[tab] ?? 0) + by },
+    })),
+  clearBadge: (tab) =>
+    set((state) => ({ badges: { ...state.badges, [tab]: 0 } })),
+}))
+```
+
+Each update spreads `badges` into a new object, which is fine: selectors subscribe to the value they return, not to the object identity of `badges`.
+
+**Read hook**, one selector per badge:
+
+```typescript
+// hooks/useTabBadge.ts
+import { useTabBadgeStore } from '@/store/tabBadgeStore'
+
+export function useTabBadge(tabName: string) {
+  return useTabBadgeStore((state) => state.badges[tabName] ?? 0)
+}
+```
+
+Reading `state.badges` directly would re-render on any badge change. Scoping the selector to one key means a cart update has no effect on the Messages tab. Wrapping it in a hook also keeps components unaware of the store's shape, so the storage strategy can change later without touching every screen.
+
+**Write hook**, stable actions:
+
+```typescript
+// hooks/useTabBadgeActions.ts
+import { useTabBadgeStore } from '@/store/tabBadgeStore'
+import { useShallow } from 'zustand/react/shallow'
+
+export function useTabBadgeActions() {
+  return useTabBadgeStore(
+    useShallow((state) => ({
+      setBadge: state.setBadge,
+      incrementBadge: state.incrementBadge,
+      clearBadge: state.clearBadge,
+    })),
+  )
+}
+```
+
+`useShallow` prevents this selector from triggering an update when the returned object is shallowly equal to the previous one, so calling this hook doesn't cause a re-render on its own.
+
+**Wiring it up**:
+
+```typescript
+// components/TabBarIcon.tsx
+import { Icon } from "@/components/Icon";
+import { Badge } from "@/components/Badge";
+import { useTabBadge } from "@/hooks/useTabBadge";
+import { StyleSheet } from "react-native-unistyles";
+
+type Props = { name: string; tabName: string; color: string };
+
+export function TabBarIcon({ name, tabName, color }: Props) {
+  const count = useTabBadge(tabName);
+
+  return (
+    <styles.Container>
+      <Icon name={name} color={color} />
+      {count > 0 && <Badge count={count} />}
+    </styles.Container>
+  );
+}
+
+const styles = StyleSheet.create((theme) => ({
+  Container: { position: "relative" },
+}));
+```
+
+```typescript
+// app/(tabs)/_layout.tsx
+<Tabs.Screen
+  name="messages"
+  options={{
+    title: "Messages",
+    tabBarIcon: ({ color }) => <TabBarIcon name="message.fill" tabName="messages" color={color} />,
+  }}
+/>
+```
+
+**Updating from anywhere**: because reads and writes are decoupled, any screen or service can update a badge without mounting the screen that owns it:
+
+```typescript
+// a chat screen, a WebSocket listener, a push notification handler
+const { incrementBadge } = useTabBadgeActions()
+incrementBadge('messages')
+```
+
+No prop drilling, no event emitter, no dependency on the tab bar being mounted.
+
+## Alternatives
+
+I originally reached for a Context here. It worked for one badge. As soon as a second and third badge showed up, keeping re-renders predictable took more discipline than the problem deserved, so I moved badges into their own store instead.
+
+**React Context** can solve this, but needs careful context splitting or a selector pattern like `use-context-selector` to avoid re-rendering every consumer on every update. Zustand gives the equivalent behavior with per-key selectors, without the setup.
+
+**Navigation params** describe navigation state, not live business data, and disappear the moment you navigate away.
+
+**Local state in the screen** works for one screen updating its own badge, and breaks as soon as another part of the app needs to update it.
+
+**React Query** is the right owner when the count is server state that needs caching or invalidation, read directly from the query result. A separate store earns its place when the count is updated locally, a push notification or a local event, ahead of any network round trip.
+
+## Conclusion
+
+Dynamic badges are often treated as a navigation problem because they show up in the navigation UI. They're not. They're a projection of application state that happens to render next to a tab icon. Once you make that distinction, Expo Router becomes almost incidental: the tab bar is just another consumer of your data, the same way a screen or a notification banner would be.

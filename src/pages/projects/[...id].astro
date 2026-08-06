@@ -3,6 +3,7 @@ import Breadcrumbs from '@/components/Breadcrumbs.astro'
 import PageHead from '@/components/PageHead.astro'
 import { badgeVariants } from '@/components/ui/badge'
 import Layout from '@/layouts/Layout.astro'
+import { SITE } from '@/consts'
 import { getAllProjects } from '@/lib/data-utils'
 import { Icon } from 'astro-icon/components'
 import { Image } from 'astro:assets'
@@ -19,25 +20,37 @@ export async function getStaticPaths() {
 const project = Astro.props
 const { Content } = await render(project)
 
+const currentUrl = Astro.url
+const currentUrlString = currentUrl.toString()
+
 const structuredData = {
   '@context': 'https://schema.org',
-  '@type': 'Projects',
+  '@type': 'CreativeWork',
   headline: project.data.name,
+  name: project.data.name,
+  url: currentUrlString,
+  mainEntityOfPage: { '@type': 'WebPage', '@id': currentUrlString },
+  inLanguage: SITE.locale,
   datePublished: project.data.startDate || '',
   dateModified: project.data.endDate || project.data.startDate || '',
-  author: {
-    '@type': 'Person',
-    name: 'Author',
-  },
+  author: { '@id': `${SITE.href}/#person` },
+  creator: { '@id': `${SITE.href}/#person` },
   image: new URL(`/image/${project.id}.png`, Astro.site).toString(),
   keywords: project.data.tags ? project.data.tags.join(', ') : '',
   description: project.data.description || '',
+  about: project.data.tags
+    ? project.data.tags.map((tag) => ({ '@type': 'Thing', name: tag }))
+    : [],
+  ...(project.data.link && { sameAs: project.data.link }),
 }
-const currentUrl = Astro.url
 ---
 
 <Layout canonicalUrl={currentUrl} isWide={true}>
-  <PageHead slot="head" title={project.data.name} />
+  <PageHead
+    slot="head"
+    title={project.data.name}
+    description={project.data.description}
+  />
   <script
     type="application/ld+json"
     is:inline
@@ -66,13 +79,10 @@ const currentUrl = Astro.url
           {
             project.data.tags && project.data.tags.length > 0 ? (
               project.data.tags.map((tag) => (
-                <a
-                  href={`/tags/${tag}`}
-                  class={badgeVariants({ variant: 'secondary' })}
-                >
+                <span class={badgeVariants({ variant: 'secondary' })}>
                   <Icon name="lucide:hash" class="size-3" />
                   {tag}
-                </a>
+                </span>
               ))
             ) : (
               <span class="text-muted-foreground text-sm">

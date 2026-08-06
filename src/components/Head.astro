@@ -1,6 +1,20 @@
 ---
-import { SITE } from '@/consts'
+import { SITE, SOCIAL_LINKS } from '@/consts'
 import Favicons from './Favicons.astro'
+
+interface Props {
+  noindex?: boolean
+}
+
+const { noindex = false } = Astro.props
+const robotsContent = noindex
+  ? 'noindex, follow'
+  : 'index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1'
+
+const personId = `${SITE.href}/#person`
+const sameAs = SOCIAL_LINKS.filter((link) => link.href.startsWith('http')).map(
+  (link) => link.href,
+)
 ---
 
 <head>
@@ -11,11 +25,8 @@ import Favicons from './Favicons.astro'
     content="width=device-width, initial-scale=1.0, user-scalable=yes"
   />
   <meta name="generator" content={Astro.generator} />
-  <meta
-    name="robots"
-    content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1"
-  />
-  <meta name="googlebot" content="index, follow" />
+  <meta name="robots" content={robotsContent} />
+  <meta name="googlebot" content={noindex ? 'noindex, follow' : 'index, follow'} />
   <meta name="google" content="notranslate" />
   <meta name="revisit-after" content="1 days" />
 
@@ -23,7 +34,7 @@ import Favicons from './Favicons.astro'
   <meta name="author" content={SITE.author} />
   <meta name="publisher" content={SITE.title} />
   <meta name="language" content={SITE.locale} />
-  <meta name="geo.region" content="RO" />
+  <meta name="geo.region" content="FR" />
   <meta name="geo.placename" content={SITE.location} />
 
   <!-- Mobile and PWA Tags -->
@@ -59,6 +70,21 @@ import Favicons from './Favicons.astro'
   />
 
   <Favicons />
+
+  <!-- Canonical Person entity, referenced by @id from other structured data -->
+  <script
+    type="application/ld+json"
+    is:inline
+    set:html={JSON.stringify({
+      '@context': 'https://schema.org',
+      '@type': 'Person',
+      '@id': personId,
+      name: SITE.author,
+      url: SITE.href,
+      jobTitle: 'Full Stack Developer',
+      sameAs,
+    })}
+  />
 
   <slot />
 </head>

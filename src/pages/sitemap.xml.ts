@@ -1,5 +1,6 @@
 import { SITE } from '@/consts'
-import { getAllTechTags } from '@/lib/data-utils'
+import { getAllArticles, getAllTags } from '@/lib/data-utils'
+import { slugifyTag } from '@/lib/utils'
 
 import type { APIRoute } from 'astro'
 import { getCollection } from 'astro:content'
@@ -15,16 +16,16 @@ export const GET: APIRoute = async (context) => {
   const pathname = requestUrl.pathname
   const baseUrl = SITE.href.replace(/\/$/, '')
 
-  const [techPosts, projects, tagsMap] = await Promise.all([
-    getCollection('tech'),
+  const [articles, projects, tagsMap] = await Promise.all([
+    getAllArticles(),
     getCollection('projects'),
-    getAllTechTags(),
+    getAllTags(),
   ])
 
   const now = new Date()
   const latestBlogDate =
-    techPosts.reduce((max, post) => {
-      if (!post.data.draft && post.data.date > max) return post.data.date
+    articles.reduce((max, post) => {
+      if (post.data.date > max) return post.data.date
       return max
     }, new Date(0)) || now
 
@@ -71,10 +72,9 @@ export const GET: APIRoute = async (context) => {
     priority: 0.9,
   })
 
-  for (const post of techPosts) {
-    if (post.data.draft) continue
+  for (const post of articles) {
     urls.push({
-      loc: `${baseUrl}/blog/${post.collection}/${encodeURIComponent(post.id)}/`,
+      loc: `${baseUrl}/articles/${encodeURIComponent(post.slug)}/`,
       lastmod: formatDate(post.data.date),
       changefreq: 'monthly',
       priority: 0.8,
@@ -91,9 +91,14 @@ export const GET: APIRoute = async (context) => {
     })
   }
 
-  for (const tag of tagsMap.keys()) {
+  // Thin tag archives (fewer than 3 articles) add little unique value and are
+  // excluded from the sitemap / noindexed until they accumulate more posts.
+  const MIN_ARTICLES_PER_TAG = 3
+
+  for (const [tag, count] of tagsMap) {
+    if (count < MIN_ARTICLES_PER_TAG) continue
     urls.push({
-      loc: `${baseUrl}/tags/${encodeURIComponent(tag)}/`,
+      loc: `${baseUrl}/tags/${encodeURIComponent(slugifyTag(tag))}/`,
       lastmod: formatDate(now),
       changefreq: 'monthly',
       priority: 0.7,

@@ -1,28 +1,15 @@
 import { glob } from 'astro/loaders'
-import { defineCollection, z } from 'astro:content'
+import { z } from 'astro/zod'
+import { defineCollection } from 'astro:content'
 
-const techBlog = defineCollection({
-  loader: glob({ pattern: '**/*.{md,mdx}', base: './src/content/tech' }),
+const articles = defineCollection({
+  loader: glob({ pattern: '**/*.{md,mdx}', base: './src/content/articles' }),
   schema: ({ image }) =>
     z.object({
       title: z.string(),
       description: z.string(),
       date: z.coerce.date(),
-      image: image().optional(),
-      tags: z.array(z.string()).optional(),
-      authors: z.array(z.string()).optional(),
-      draft: z.boolean().optional(),
-      slug: z.string().optional(),
-    }),
-})
-
-const personalBlog = defineCollection({
-  loader: glob({ pattern: '**/*.{md,mdx}', base: './src/content/personal' }),
-  schema: ({ image }) =>
-    z.object({
-      title: z.string(),
-      description: z.string(),
-      date: z.coerce.date(),
+      updatedDate: z.coerce.date().optional(),
       image: image().optional(),
       tags: z.array(z.string()).optional(),
       authors: z.array(z.string()).optional(),
@@ -45,4 +32,4 @@ const projects = defineCollection({
     }),
 })
 
-export const collections = { tech: techBlog, personal: personalBlog, projects }
+export const collections = { articles, projects }
