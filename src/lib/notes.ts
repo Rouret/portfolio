@@ -27,8 +27,8 @@ export const notesTree: Note[] = [
         description:
           'Routing, navigation state, and authentication patterns with Expo Router.',
         articleSlugs: [
-          'stop-treating-tabbarbadge-as-a-navigation-problem-keeping-it-in-sync-with-zustand',
-          'stop-using-manual-redirects-for-expo-router-authentication-use-protected-stack-instead',
+          'expo-router-tabbar-badge-sync-zustand',
+          'expo-router-authentication-protected-stack',
         ],
       },
     ],
@@ -41,7 +41,7 @@ export const notesTree: Note[] = [
     emoji: '🛠️',
     articleSlugs: [
       'we-cut-our-daily-standup-from-45-to-15-minutes-with-one-simple-change',
-      'effective-team-strategy-for-code-integration',
+      'ship-show-ask-pull-request-strategy',
     ],
   },
   {
@@ -50,7 +50,7 @@ export const notesTree: Note[] = [
     description: "Patterns and pitfalls I've run into building with React.",
     icon: 'react',
     articleSlugs: [
-      'react-error-handling-for-beginners-using-error-boundaries',
+      'react-error-handling-with-error-boundaries',
       'stop-using-usequery-from-react-query',
     ],
   },
@@ -59,13 +59,17 @@ export const notesTree: Note[] = [
     title: 'Entrepreneurship',
     description: 'Lessons from building a startup from scratch.',
     emoji: '🚀',
-    articleSlugs: ['we-are-creating-a-startup', 'work-the-material'],
+    articleSlugs: ['building-our-startup-from-scratch', 'why-ideas-need-time-before-you-build'],
   },
   {
     slug: 'personal-growth',
     title: 'Personal Growth',
     description: 'Reflections on ambition, burnout, and moving forward.',
     emoji: '🌱',
-    articleSlugs: ['how-to-be-better', 'i-almost-gave-up', 'work-the-material'],
+    articleSlugs: [
+      'three-rules-to-grow-without-burnout',
+      'why-i-almost-gave-up',
+      'why-ideas-need-time-before-you-build',
+    ],
   },
 ]
