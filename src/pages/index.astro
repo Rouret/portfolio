@@ -13,7 +13,9 @@ import me from '../assets/me.jpg'
 
 const currentUrl = Astro.url
 const projects = await getAllProjects()
-const currentProject = projects.find((project) => project.id === 'lyn-meteo')
+const currentProjects = ['swelly', 'dancs']
+  .map((id) => projects.find((project) => project.id === id))
+  .filter((project) => project !== undefined)
 const allArticles = await getAllArticles()
 ---
 
@@ -90,7 +92,7 @@ const allArticles = await getAllArticles()
     </div>
 
     {
-      currentProject && (
+      currentProjects.length > 0 && (
         <section class="relative" aria-labelledby="current-project-title">
           <h2
             id="current-project-title"
@@ -105,48 +107,52 @@ const allArticles = await getAllArticles()
             class="text-muted-foreground text-sm"
             aria-label="current project description"
           >
-            Outside of my day job, this is the project I'm currently pouring my
-            time into.
+            Outside of my day job, these are the projects I'm currently pouring
+            my time into.
           </p>
-          <a
-            href={`/projects/${currentProject.id}`}
-            class="group bg-card border-card-foreground/10 mt-4 flex flex-col overflow-hidden rounded-2xl border transition-all duration-300 hover:shadow-lg sm:flex-row"
-            aria-label={`See ${currentProject.data.name} project`}
-          >
-            <div class="aspect-[16/10] w-full overflow-hidden sm:w-72 sm:shrink-0">
-              <Image
-                alt={currentProject.data.name}
-                src={currentProject.data.image}
-                class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                loading="lazy"
-                width={600}
-                height={375}
-              />
-            </div>
-            <div class="flex flex-1 flex-col justify-between p-5">
-              <div>
-                <h3 class="text-foreground mb-2 text-xl font-medium">
-                  {currentProject.data.name}
-                </h3>
-                <p class="text-muted-foreground mb-4 text-sm">
-                  {currentProject.data.description}
-                </p>
-              </div>
-              <div class="flex flex-wrap gap-2">
-                {currentProject.data.tags?.map((tag) => (
-                  <span class="bg-primary/10 text-primary rounded-full px-2 py-1 text-xs font-medium">
-                    {tag}
-                  </span>
-                ))}
-              </div>
-            </div>
-            <div class="flex items-center p-5 sm:pl-0">
-              <Icon
-                name="lucide:arrow-right"
-                class="size-5 transition-transform group-hover:translate-x-1"
-              />
-            </div>
-          </a>
+          <div class="mt-4 flex flex-col gap-4">
+            {currentProjects.map((project) => (
+              <a
+                href={`/projects/${project.id}`}
+                class="group bg-card border-card-foreground/10 flex flex-col overflow-hidden rounded-2xl border transition-all duration-300 hover:shadow-lg sm:flex-row"
+                aria-label={`See ${project.data.name} project`}
+              >
+                <div class="aspect-[16/10] w-full overflow-hidden sm:w-72 sm:shrink-0">
+                  <Image
+                    alt={project.data.name}
+                    src={project.data.image}
+                    class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    loading="lazy"
+                    width={600}
+                    height={375}
+                  />
+                </div>
+                <div class="flex flex-1 flex-col justify-between p-5">
+                  <div>
+                    <h3 class="text-foreground mb-2 text-xl font-medium">
+                      {project.data.name}
+                    </h3>
+                    <p class="text-muted-foreground mb-4 text-sm">
+                      {project.data.description}
+                    </p>
+                  </div>
+                  <div class="flex flex-wrap gap-2">
+                    {project.data.tags?.map((tag) => (
+                      <span class="bg-primary/10 text-primary rounded-full px-2 py-1 text-xs font-medium">
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+                <div class="flex items-center p-5 sm:pl-0">
+                  <Icon
+                    name="lucide:arrow-right"
+                    class="size-5 transition-transform group-hover:translate-x-1"
+                  />
+                </div>
+              </a>
+            ))}
+          </div>
         </section>
       )
     }
