@@ -1,0 +1,112 @@
+---
+title: 'Agents Write Good Code. Trust Is the Bottleneck.'
+description: 'How I think about an agent software factory: the roles, the handoffs, the evidence, and the guardrails that let you merge without reading every line.'
+date: 2026-11-20
+tags:
+  - 'AI'
+  - 'Agents'
+  - 'Software Engineering'
+authors:
+  - 'Lucas Rouret'
+---
+
+import FactoryIsland from '../../../components/react/factory/FactoryIsland.astro'
+
+<FactoryIsland name="trust" />
+
+Coding agents are already good at writing code. That is no longer the constraint. The constraint is trust: being able to merge a change without reading every line of it.
+
+More generation does not buy trust. Verification does. A factory that opens ten pull requests an hour is worthless if each one still needs a careful human read. One that opens three, each arriving with evidence a reviewer can check in thirty seconds, changes how a team ships.
+
+I treat a ticket as raw material. The idea comes from Ryo Lu's [How to make something great](https://ryolu.notion.site/how-to-make-something-great), which I wrote about in [Why every idea needs time to take shape](/articles/why-ideas-need-time-before-you-build/): _"Craft's truth emerges only through the friction of material engagement."_ The metaphor is imperfect, since a ticket already fixes the goal. The work on it is the same: cut it, bend it, test it, reshape it until it is better than what came in.
+
+An agent left alone works the material the lazy way. It shaves off whatever resists until the shape merely passes: it deletes the failing test, loosens the assertion, quietly narrows the scope. Everything below exists to force the other path, a change that is genuinely better rather than just accepted.
+
+This is the model I have landed on. Its core idea comes from Lauren Tan's work on agent harnesses: the agent that builds is a **lead** who designs, delegates the typing and verifies; the reviewer only **stamps** the output. I keep the idea and leave out the heavy tooling. What follows is the logic (the roles, the handoffs, what each one may and may not do), not an installation guide. Take what fits your team.
+
+## Principles
+
+Seven rules shape every decision below. Each one keeps the material honest: reshaped, never shaved to fit. Open one to see what it looks like in practice.
+
+<FactoryIsland name="principles" />
+
+## The flow
+
+A ticket goes in as raw material. A merged, proven change comes out. In between sit four roles, each with a narrow job and a short list of things it must never do.
+
+The key separation happens inside the dev step: a sub-agent writes, the lead verifies. End-to-end tests are frozen before any code exists and run once, by the lead. The reviewer judges the evidence without re-running anything, and when it says no, it gives every reason at once.
+
+Follow one real ticket through the factory. Each step shows what the role does, what it refuses to do, and exactly what it hands to the next one.
+
+<FactoryIsland name="flow" />
+
+### The ticket carries the most leverage
+
+This is where the material is worked hardest, before any code touches it: questioned, split, cut back to what can be observed. The goal is that the dev guesses nothing. A perfectly formatted ticket that is still vague is worthless: the format is a means, clarity is the point. The ticket skill is a tool for the human, not bureaucracy. It reads the code and the map, then pushes back: _"this rule already exists"_, _"this will force a refactor of the storage module"_. An acceptance criterion nobody can observe, like _"it feels smoother"_, does not pass.
+
+The ticket also decides how much control follows. The flow never changes; the proof it demands and the checks around it do. Pick a ticket and see.
+
+<FactoryIsland name="controls" />
+
+### The lead does not type
+
+Delegating the typing is mandatory, even for a two-line ticket. The gain is not speed, it is separation: the agent that wrote the code is the one least able to judge it. The lead keeps design, review and evidence. Disposable runner agents execute each command and return only a result and the path to its evidence, so the lead's context stays clean for judgment.
+
+The lead is briefed as a senior engineer, not an executor: a posture, not a procedure for every case. It looks for the viable solution, not the quick fix. It reproduces a bug and proves its cause before touching it. When the right fix needs a refactor, it does it in a separate commit. It prefers deleting to adding. It knows when to stop and ask: when a decision changes the architecture or the scope. Only three red lines: no band-aids, no silent workarounds, no "green" without proof.
+
+### The reviewer writes its expectations first
+
+Before reading a single test, the reviewer writes down, from the ticket alone, the end state it expects for each criterion. That is what makes its reading independent of the lead's. If the lead misread a criterion, the mistake sits in the code _and_ in the tests. Only an expectation formed upstream of both catches it.
+
+Evidence means files produced by commands: test reports, screenshots, exit codes. A summary written by an agent is not evidence. Missing evidence is a no.
+
+## The feature map
+
+A factory needs a shared description of what the app does, from the user's point of view: how to reach each feature and what proves it works. That is the feature map. One short card per feature, no implementation detail. The code stays the technical truth; agents move from map to code through shared vocabulary, test IDs and predictable folders.
+
+<FactoryIsland name="map" />
+
+What makes the map trustworthy is who writes what. The dev writes the card before the code. The reviewer validates it. A card is marked verified only on a commit where its tests actually passed. Since nothing merges without both, the main branch's map contains only what has been proven.
+
+Maps still drift: refactors and dependency upgrades change behavior without a ticket. A scheduled pass catches that. For every card whose files changed since its last verified commit, it re-runs that card's tests. Green, it moves the marker forward. Red, it opens a ticket and fixes nothing itself. It is a safety net, not a substitute for updating the map in the pull request.
+
+## How agents cheat
+
+The most serious risk is not a bug in the code. It is a dev agent writing tests that validate its own bugs. Everything else is secondary, but everything else still happens. Here is what to expect, and the countermeasure for each.
+
+<FactoryIsland name="guardrails" />
+
+Notice the pattern: almost none of the countermeasures is a sentence in a prompt. Prompts are suggestions. Checks are guarantees.
+
+## A factory that improves itself
+
+Every agent failure is a hole in the system, not in the agent. You plug it with a test, a tool, a lint rule or a skill rule, so the next run cannot make the same mistake.
+
+<FactoryIsland name="loop" />
+
+That only works under two conditions. First, the factory lives in the repository: prompts, skills, commands and checks are versioned like the rest of the code, which is what makes two variants comparable. Second, you measure. Four numbers are enough: send-back rate, revert rate, cost per pull request and cycle time from ticket to merge.
+
+A weekly retro agent reads that log, spots recurring failures (redundant tests, band-aids, poorly proven criteria) and proposes changes to prompts, skills or checks. A human approves them. Experiments change one variable at a time, such as the model behind one role or a skill added or removed, and are measured over a few tickets before they stay.
+
+## What I don't know yet
+
+Some decisions should be made with data, not opinions.
+
+- **Reviewer model.** The same model as the lead, or a different one to diversify blind spots?
+- **Risk thresholds.** What can safely be lighter for a low-risk ticket?
+- **Maintenance cadence.** Daily, or triggered after every merge?
+- **When a ticket "touches the map".** The threshold needs real tickets to settle.
+
+The headline numbers from public talks, thousands of pull requests a month with sub-percent revert rates, are self-reported. Measure your own before adding complexity. Start with three to five features and real tickets, and add a mechanism only once its absence has hurt.
+
+## Further reading
+
+- [How to make something great](https://ryolu.notion.site/how-to-make-something-great), Ryo Lu
+- [Trust first, then parallel](https://redreamality.com/blog/lauren-tan-poteto-trust-before-parallel/), an analysis of Lauren Tan's talk
+- [Effective harnesses for long-running agents](https://anthropic.com/engineering/effective-harnesses-for-long-running-agents), Anthropic
+- [Harness design for long-running apps](https://anthropic.com/engineering/harness-design-long-running-apps), Anthropic
+- [OpenAI's software factory](https://newsletter.pragmaticengineer.com/p/openai-software-factory), The Pragmatic Engineer
+- [Teach an agent to fish and it will maintain your code for a lifetime](https://builder.aws.com/content/3MLGDWXY8MA3cdDNL2o1P9yjyP4/teach-an-agent-to-fish-and-it-will-maintain-your-code-for-a-lifetime), AWS Builder
+- [Spec-driven development tools](https://www.martinfowler.com/articles/exploring-gen-ai/sdd-3-tools.html), Birgitta Böckeler
+- [LLM test generators that validate bugs](https://arxiv.org/abs/2412.14137v1), arXiv 2412.14137
+- [Context reset vs model diversity](https://agentpatterns.ai/patterns/multi-agent/context-reset-vs-model-diversity/), agentpatterns.ai

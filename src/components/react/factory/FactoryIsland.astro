@@ -1,0 +1,24 @@
+---
+// MDX (satteri pipeline) loses client:* hydration metadata, so islands are hydrated from Astro instead.
+import TrustStrip from './trust-strip'
+import Principles from './principles'
+import FactoryFlow from './factory-flow'
+import FeatureMapCard from './feature-map-card'
+import Guardrails from './guardrails'
+import ImprovementLoop from './improvement-loop'
+import TicketControls from './ticket-controls'
+
+type Props = {
+  name: 'trust' | 'principles' | 'flow' | 'controls' | 'map' | 'guardrails' | 'loop'
+}
+
+const { name } = Astro.props
+---
+
+{name === 'trust' && <TrustStrip client:idle />}
+{name === 'principles' && <Principles client:idle />}
+{name === 'flow' && <FactoryFlow client:idle />}
+{name === 'controls' && <TicketControls client:idle />}
+{name === 'map' && <FeatureMapCard client:idle />}
+{name === 'guardrails' && <Guardrails client:idle />}
+{name === 'loop' && <ImprovementLoop client:idle />}
