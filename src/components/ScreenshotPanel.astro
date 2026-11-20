@@ -1,0 +1,26 @@
+---
+import type { ImageMetadata } from 'astro'
+import { Image } from 'astro:assets'
+import { cn } from '@/lib/utils'
+
+interface Props {
+  src: ImageMetadata
+  alt: string
+  class?: string
+  imageClass?: string
+  loading?: 'lazy' | 'eager'
+}
+
+const { src, alt, class: className, imageClass, loading = 'lazy' } = Astro.props
+---
+
+<div class={cn('bg-muted flex items-center p-5 sm:p-10', className)}>
+  <Image
+    src={src}
+    alt={alt}
+    width={1200}
+    height={750}
+    loading={loading}
+    class={cn('border-border aspect-[16/10] w-full rounded-lg border object-cover object-top shadow-xl', imageClass)}
+  />
+</div>

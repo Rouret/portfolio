@@ -29,7 +29,7 @@ const stages: Stage[] = [
     ],
     never: ['Writes code', 'Accepts an unobservable criterion'],
     output: 'The ticket',
-    artifact: `Feature · risk: high · touches the map
+    artifact: `Feature, risk: high, touches the map
 
 AC-1  Given a section is hidden in settings,
       when I open the detail screen,
@@ -43,7 +43,7 @@ Out of scope: syncing across devices.`,
   {
     icon: Compass,
     title: 'Dev lead',
-    who: 'Agent · designs, delegates, verifies',
+    who: 'Agent: designs, delegates, verifies',
     does: 'Owns the design and the proof. Writes the feature card and the end-to-end tests before any code exists.',
     posture: [
       'Briefed as a senior engineer: a posture, not a procedure.',
@@ -102,7 +102,7 @@ lead     added a migration test from the old format.`,
   {
     icon: Stamp,
     title: 'Stamp',
-    who: 'Reviewer · fresh context',
+    who: 'Reviewer with a fresh context',
     does: 'Checks the need is met and the evidence holds. Re-runs nothing. Says yes, or no with every reason at once.',
     posture: [
       'Writes the expected end state of each criterion from the ticket alone, before reading any test.',
@@ -118,11 +118,11 @@ verdict  NO
     sendBack: {
       artifact: `fresh dev session reads the verdict
 e2e      [detail-sections/AC-2] relaunch, then assert
-runners  exit 0 · 2 passed
+runners  exit 0, 2 passed
 
 verdict  YES
-  AC-1  section absent · screenshot 2
-  AC-2  order kept after relaunch · screenshot 4`,
+  AC-1  section absent, screenshot 2
+  AC-2  order kept after relaunch, screenshot 4`,
     },
   },
   {
@@ -144,7 +144,7 @@ function Artifact({ stage }: { stage: Stage }) {
     <div className="flex min-w-0 flex-col gap-2">
       <div className="bg-background overflow-hidden rounded-lg border">
         <div className="text-muted-foreground flex items-center justify-between border-b px-3 py-1.5 text-[11px] tracking-wide uppercase">
-          <span>Hands over · {stage.output}</span>
+          <span>Hands over: {stage.output}</span>
           {stage.sendBack && <span>{sentBack ? 'Round 2' : 'Round 1'}</span>}
         </div>
         <pre className="text-foreground/90 m-0 overflow-x-auto p-3 font-mono text-xs leading-relaxed whitespace-pre">

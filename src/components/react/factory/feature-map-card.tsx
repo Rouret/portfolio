@@ -45,7 +45,7 @@ export default function FeatureMapCard() {
   return (
     <div className="not-prose my-8 grid gap-4 md:grid-cols-[minmax(0,1fr)_16rem]">
       <div className="bg-card overflow-hidden rounded-xl border font-mono text-xs leading-relaxed">
-        <div className="text-muted-foreground border-b px-4 py-2">detail-sections.md · 20 to 60 lines</div>
+        <div className="text-muted-foreground border-b px-4 py-2">detail-sections.md, 20 to 60 lines</div>
         <div className="flex flex-col p-2">
           {sections.map((section) => (
             <button

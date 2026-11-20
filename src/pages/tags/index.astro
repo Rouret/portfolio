@@ -1,39 +1,32 @@
 ---
-import Breadcrumbs from '@/components/Breadcrumbs.astro'
-import Link from '@/components/Link.astro'
 import PageHead from '@/components/PageHead.astro'
-import { badgeVariants } from '@/components/ui/badge'
+import PageHeader from '@/components/PageHeader.astro'
 import Layout from '@/layouts/Layout.astro'
 import { getSortedTags } from '@/lib/data-utils'
-import { Icon } from 'astro-icon/components'
+import { slugifyTag } from '@/lib/utils'
 
 const sortedTags = await getSortedTags()
-const currentUrl = Astro.url
 ---
 
-<Layout canonicalUrl={currentUrl}>
-  <PageHead
-    slot="head"
-    title="Tags"
-    description="Browse all article topics and tags on Lucas Rouret's blog."
-  />
-  <Breadcrumbs items={[{ label: 'Tags', icon: 'lucide:tags' }]} />
+<Layout canonicalUrl={Astro.url}>
+  <PageHead slot="head" title="Tags" description="Browse every article topic on Lucas Rouret's blog." />
 
-  <h1 class="mb-4 text-3xl font-bold">Tags</h1>
-  <div class="flex flex-col gap-4">
-    <div class="flex flex-wrap gap-2">
+  <div class="flex flex-col gap-12">
+    <PageHeader title="Tags.">Every topic I have written about.</PageHeader>
+
+    <ul class="flex flex-wrap gap-2">
       {
         sortedTags.map(({ tag, count }) => (
-          <Link
-            href={`/tags/${tag}`}
-            class={badgeVariants({ variant: 'secondary' })}
-          >
-            <Icon name="lucide:hash" class="size-3" />
-            {tag}
-            <span class="text-muted-foreground ml-1.5">({count})</span>
-          </Link>
+          <li>
+            <a
+              href={`/tags/${slugifyTag(tag)}`}
+              class="border-border text-muted-foreground hover:border-foreground hover:text-foreground inline-flex min-h-10 items-center gap-2 rounded-full border px-4 text-sm transition-colors"
+            >
+              #{tag} <span class="opacity-60">{count}</span>
+            </a>
+          </li>
         ))
       }
-    </div>
+    </ul>
   </div>
 </Layout>

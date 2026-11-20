@@ -1,0 +1,44 @@
+---
+import CoverImage from '@/components/CoverImage.astro'
+import type { ArticleWithSlug } from '@/lib/data-utils'
+import { cn } from '@/lib/utils'
+
+interface Props {
+  article: ArticleWithSlug
+  size: 'sm' | 'lg'
+  class?: string
+}
+
+const tones = [
+  'from-primary to-secondary text-primary-foreground',
+  'from-foreground to-primary text-background',
+  'from-secondary to-muted text-secondary-foreground',
+]
+
+const sizes = {
+  sm: { box: 'p-4 sm:p-5', title: 'line-clamp-3 text-lg' },
+  lg: { box: 'p-5 sm:p-8', title: 'text-3xl sm:text-4xl' },
+}
+
+const { article, size, class: className } = Astro.props
+const { image, title } = article.data
+const tone = tones[[...article.slug].reduce((sum, char) => sum + char.charCodeAt(0), 0) % tones.length]
+---
+
+{
+  image ? (
+    <CoverImage
+      src={image}
+      width={900}
+      height={560}
+      loading="lazy"
+      class={cn('aspect-[16/10] w-full object-cover', className)}
+    />
+  ) : (
+    <div
+      class={cn('flex aspect-[16/10] w-full items-end overflow-hidden bg-gradient-to-br', tone, sizes[size].box, className)}
+    >
+      <p class={cn('font-custom leading-tight font-bold', sizes[size].title)}>{title}</p>
+    </div>
+  )
+}

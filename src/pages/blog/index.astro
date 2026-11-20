@@ -1,38 +1,112 @@
 ---
-import Breadcrumbs from '@/components/Breadcrumbs.astro'
+import ArticleCard from '@/components/ArticleCard.astro'
 import PageHead from '@/components/PageHead.astro'
-import ArticleManager from '@/components/react/article-manager'
+import PageHeader from '@/components/PageHeader.astro'
+import { BLOG_DESCRIPTION } from '@/consts'
 import Layout from '@/layouts/Layout.astro'
-import { getAllArticles } from '@/lib/data-utils'
+import { getAllArticles, type ArticleWithSlug } from '@/lib/data-utils'
 import { notesTree } from '@/lib/notes'
+import { noteArticleSlugs } from '@/lib/notes-utils'
+import { Icon } from 'astro-icon/components'
 
-const allArticles = await getAllArticles()
+const articles = await getAllArticles()
+const [featured, ...rest] = articles
 
-const currentUrl = Astro.url
+const themes = notesTree
+  .map((note) => {
+    const slugs = new Set(noteArticleSlugs(note))
+    return { slug: note.slug, title: note.title, slugs, count: articles.filter((a) => slugs.has(a.slug)).length }
+  })
+  .filter((theme) => theme.count > 0)
+
+const filterData = (article: ArticleWithSlug) => ({
+  'data-themes': themes.filter((theme) => theme.slugs.has(article.slug)).map((theme) => theme.slug).join(' '),
+  'data-text': [article.data.title, article.data.description, ...(article.data.tags ?? [])].join(' ').toLowerCase(),
+})
+
+const chipClass =
+  'border-border text-muted-foreground hover:text-foreground aria-pressed:border-foreground aria-pressed:bg-foreground aria-pressed:text-background inline-flex min-h-10 cursor-pointer items-center gap-2 rounded-full border px-4 text-sm transition-colors'
 ---
 
-<Layout canonicalUrl={currentUrl}>
+<Layout canonicalUrl={Astro.url}>
   <PageHead
     slot="head"
     title="Blog"
-    description="Technical articles and personal reflections on web development, programming, and software engineering."
+    description={BLOG_DESCRIPTION}
     includeBlogList={true}
   />
 
-  <Breadcrumbs
-    items={[{ label: 'Blog', href: '/blog', icon: 'lucide:folder-open' }]}
-  />
+  <div class="flex flex-col gap-12">
+    <PageHeader title="Writing.">
+      Notes from building products: React and Expo, AI agents, teamwork, and life as a solopreneur.
+    </PageHeader>
 
-  <section class="max-screen mt-12 px-4 md:px-6">
-    <h2 class="font-custom text-foreground mt-2 text-4xl font-bold">Blog</h2>
-    <p class="text-muted-foreground text-md mt-3 max-w-2xl">
-      Technical articles and personal reflections all in one place.
-    </p>
-  </section>
+    {featured && <ArticleCard article={featured} featured {...filterData(featured)} />}
 
-  <div
-    class="my-12 flex min-h-[calc(100vh-18rem)] flex-col gap-y-8 px-4 md:px-6"
-  >
-    <ArticleManager client:load articles={allArticles} notes={notesTree} />
+    <section class="flex flex-col gap-8" aria-label="All articles">
+      <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+        <div class="flex flex-wrap gap-2" role="group" aria-label="Filter by theme">
+          <button type="button" class={chipClass} data-theme="" aria-pressed="true">
+            All <span class="opacity-60">{articles.length}</span>
+          </button>
+          {
+            themes.map((theme) => (
+              <button type="button" class={chipClass} data-theme={theme.slug} aria-pressed="false">
+                {theme.title} <span class="opacity-60">{theme.count}</span>
+              </button>
+            ))
+          }
+        </div>
+        <label class="border-border focus-within:border-foreground flex min-h-10 items-center gap-2 rounded-full border px-4 md:w-72">
+          <Icon name="lucide:search" class="text-muted-foreground size-4 shrink-0" />
+          <span class="sr-only">Search articles</span>
+          <input
+            id="article-search"
+            type="search"
+            placeholder="Search articles"
+            class="text-foreground placeholder:text-muted-foreground w-full bg-transparent text-sm outline-none"
+          />
+        </label>
+      </div>
+
+      <ul class="grid gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3">
+        {
+          rest.map((article) => (
+            <li {...filterData(article)}>
+              <ArticleCard article={article} />
+            </li>
+          ))
+        }
+      </ul>
+      <p id="article-empty" class="text-muted-foreground" hidden>No article matches. Try another theme or word.</p>
+    </section>
   </div>
 </Layout>
+
+<script>
+  const chips = document.querySelectorAll<HTMLButtonElement>('button[data-theme]')
+  const items = document.querySelectorAll<HTMLElement>('[data-themes]')
+  const search = document.querySelector<HTMLInputElement>('#article-search')
+  const empty = document.querySelector<HTMLElement>('#article-empty')
+  let theme = ''
+
+  const update = () => {
+    const query = search?.value.trim().toLowerCase() ?? ''
+    let shown = 0
+    for (const item of items) {
+      const { themes = '', text = '' } = item.dataset
+      item.hidden = !((!theme || themes.split(' ').includes(theme)) && text.includes(query))
+      if (!item.hidden) shown++
+    }
+    if (empty) empty.hidden = shown > 0
+  }
+
+  for (const chip of chips) {
+    chip.addEventListener('click', () => {
+      theme = chip.dataset.theme ?? ''
+      chips.forEach((c) => c.setAttribute('aria-pressed', String(c === chip)))
+      update()
+    })
+  }
+  search?.addEventListener('input', update)
+</script>

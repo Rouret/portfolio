@@ -1,0 +1,15 @@
+---
+import type { ArticleWithSlug } from '@/lib/data-utils'
+import { Image } from 'astro:assets'
+import type { HTMLAttributes } from 'astro/types'
+
+interface Props extends Omit<HTMLAttributes<'img'>, 'src'> {
+  src: NonNullable<ArticleWithSlug['data']['image']>
+  width: number
+  height: number
+}
+
+const { src, ...attrs } = Astro.props
+---
+
+{typeof src === 'string' ? <Image src={src} alt="" {...attrs} /> : <Image src={src} alt="" {...attrs} />}

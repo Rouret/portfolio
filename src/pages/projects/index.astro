@@ -1,0 +1,30 @@
+---
+import PageHead from '@/components/PageHead.astro'
+import ProjectCard from '@/components/ProjectCard.astro'
+import SectionHeading from '@/components/SectionHeading.astro'
+import Layout from '@/layouts/Layout.astro'
+import { getAllProjects } from '@/lib/data-utils'
+
+const projects = await getAllProjects()
+---
+
+<Layout>
+  <PageHead
+    slot="head"
+    title="Projects"
+    description="Apps Lucas Rouret builds outside of client work: mobile weather and surf apps, and a desktop replay tool for Counter-Strike 2."
+  />
+
+  <div class="flex flex-col gap-10 pt-10 pb-28 sm:pt-20">
+    <div class="flex flex-col gap-6">
+      <SectionHeading as="h1">Projects.</SectionHeading>
+      <p class="text-muted-foreground text-lg">
+        Apps I build outside of client work, alone or with friends. Client projects stay private.
+      </p>
+    </div>
+
+    <div class="flex flex-col gap-6">
+      {projects.map((project) => <ProjectCard project={project} />)}
+    </div>
+  </div>
+</Layout>

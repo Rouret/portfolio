@@ -1,13 +1,13 @@
 ---
-name: 'Swelly - Surf forecast app designed for beginners'
+name: 'Swelly'
+pitch: 'Surf forecast app designed for beginners'
+kind: 'Mobile app'
 description: 'A surf forecast app designed for beginners. Our goal: to make weather information for each surf spot accessible, guide you, provide advice on as many aspects as possible, and most importantly make it all readable!'
-tags: ['React Native', 'Supabase', 'Expo', 'EAS', 'Python', 'Méteo France']
+tags: ['React Native', 'Supabase', 'Expo', 'EAS', 'Python', 'Météo-France']
 image: '../../../public/static/swelly-surf.com.jpeg'
 link: 'https://www.swelly-surf.com/'
 startDate: '2024-03-01'
 ---
-
-# Swelly
 
 A surf forecast app designed for beginners. Our goal: to make weather information for each surf spot accessible, guide you, provide advice on as many aspects as possible, and most importantly make it all readable!
 
@@ -22,7 +22,7 @@ A surf forecast app designed for beginners. Our goal: to make weather informatio
 - **[EAS](https://expo.dev/eas)** - Ecosystem of tools for React Native
 - **[Supabase](https://www.typescriptlang.org/)** - Database
 - **Python** - Weather backend language to manage mathematic calculations and clean data
-- **Meteo France API** - API
+- **Météo-France API** - API
 
 ## Content about the project
 

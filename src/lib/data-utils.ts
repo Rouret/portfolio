@@ -138,8 +138,12 @@ export async function getAllProjects(): Promise<CollectionEntry<'projects'>[]> {
   const projects = await getCollection('projects')
   return projects.sort(
     (a, b) =>
-      (b.data.startDate?.valueOf() ?? 0) - (a.data.startDate?.valueOf() ?? 0),
+      b.data.startDate.valueOf() - a.data.startDate.valueOf(),
   )
+}
+
+export function projectLabel(project: CollectionEntry<'projects'>): string {
+  return `${project.data.kind}, ${project.data.startDate.getFullYear()}`
 }
 
 export async function getProjectsFeaturedTags(

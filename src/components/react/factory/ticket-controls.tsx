@@ -75,7 +75,7 @@ export default function TicketControls() {
       </div>
       <div aria-live="polite" className="bg-muted/50 flex flex-col gap-4 self-start rounded-lg p-4">
         <p className="text-muted-foreground m-0 text-[11px] tracking-wide uppercase">
-          {type.label} · {risk.label.toLowerCase()} risk
+          {type.label}, {risk.label.toLowerCase()} risk
         </p>
         {rows.map((row) => (
           <div key={row.label}>

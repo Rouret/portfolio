@@ -6,9 +6,8 @@ import Footer from '@/components/Footer.astro'
 import Head from '@/components/Head.astro'
 import Navbar from '@/components/react/navbar'
 import { SITE } from '@/consts'
-import { cn } from '@/lib/utils'
 
-const { isWide = false, noindex = false } = Astro.props
+const { noindex = false } = Astro.props
 ---
 
 <!doctype html>
@@ -82,13 +81,10 @@ const { isWide = false, noindex = false } = Astro.props
         aria-label="Main content"
         role="main"
       >
-        <div
-          class={cn(
-            'mx-auto flex grow flex-col gap-y-4 sm:gap-y-6 px-3 py-10 sm:py-16 md:py-20 lg:py-24 sm:px-6 lg:px-8',
-            !isWide && 'max-w-5xl',
-          )}
-        >
-          <slot />
+        <div class="flex grow flex-col px-3 py-10 sm:px-6 sm:py-16 md:py-20 lg:px-8 lg:py-24">
+          <div class="mx-auto flex w-full max-w-6xl grow flex-col gap-y-4 sm:gap-y-6">
+            <slot />
+          </div>
         </div>
       </main>
       <Footer />

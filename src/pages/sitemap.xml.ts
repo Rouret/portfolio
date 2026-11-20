@@ -31,7 +31,7 @@ export const GET: APIRoute = async (context) => {
 
   const latestProjectDate =
     projects.reduce((max, project) => {
-      const projectDate = project.data.endDate || project.data.startDate || now
+      const projectDate = project.data.endDate || project.data.startDate
       return projectDate > max ? projectDate : max
     }, new Date(0)) || now
 
@@ -82,7 +82,7 @@ export const GET: APIRoute = async (context) => {
   }
 
   for (const project of projects) {
-    const projectDate = project.data.endDate || project.data.startDate || now
+    const projectDate = project.data.endDate || project.data.startDate
     urls.push({
       loc: `${baseUrl}/projects/${encodeURIComponent(project.id)}/`,
       lastmod: formatDate(projectDate),

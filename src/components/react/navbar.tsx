@@ -113,7 +113,8 @@ const Navbar = () => {
           isMobile && 'border-0',
         )}
       >
-        <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 p-4">
+        <div className="px-3 sm:px-6 lg:px-8">
+        <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 py-4">
           <Link
             href="/"
             className="font-custom flex shrink-0 items-center gap-2 text-xl font-bold"
@@ -183,6 +184,7 @@ const Navbar = () => {
               </Button>
             )}
           </div>
+        </div>
         </div>
       </motion.header>
 

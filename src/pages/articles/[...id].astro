@@ -1,12 +1,10 @@
 ---
 import Breadcrumbs from '@/components/Breadcrumbs.astro'
-import Link from '@/components/Link.astro'
 import PostHead from '@/components/PostHead.astro'
+import CoverImage from '@/components/CoverImage.astro'
 import PostNavigation from '@/components/PostNavigation.astro'
 import TableOfContents from '@/components/TableOfContents.astro'
-import { badgeVariants } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import { Separator } from '@/components/ui/separator'
+import { Button, buttonVariants } from '@/components/ui/button'
 import Layout from '@/layouts/Layout.astro'
 import { getAdjacentArticles, getAllArticles } from '@/lib/data-utils'
 import { formatDate, readingTime, slugifyTag } from '@/lib/utils'
@@ -28,168 +26,110 @@ const { Content, headings } = await render(post)
 const { next, prev } = await getAdjacentArticles(currentPostSlug)
 
 const canonicalUrl = new URL(`/articles/${post.slug}/`, Astro.site).toString()
+const shareUrl = encodeURIComponent(canonicalUrl)
+const shareLinks = [
+  { name: 'Facebook', icon: 'line-md:facebook', href: `https://www.facebook.com/sharer/sharer.php?u=${shareUrl}` },
+  { name: 'Twitter', icon: 'line-md:twitter', href: `https://twitter.com/intent/tweet?url=${shareUrl}` },
+  { name: 'LinkedIn', icon: 'line-md:linkedin', href: `https://www.linkedin.com/shareArticle?mini=true&url=${shareUrl}` },
+  { name: 'Reddit', icon: 'line-md:reddit-loop', href: `https://www.reddit.com/submit?url=${shareUrl}` },
+  { name: 'WhatsApp', icon: 'mdi:whatsapp', href: `https://wa.me/?text=${shareUrl}` },
+  { name: 'Telegram', icon: 'line-md:telegram', href: `https://t.me/share/url?url=${shareUrl}` },
+  { name: 'Pinterest', icon: 'mdi:pinterest', href: `https://pinterest.com/pin/create/button/?url=${shareUrl}` },
+]
 ---
 
 <Layout canonicalUrl={canonicalUrl}>
   <PostHead slot="head" post={post} />
 
-  <section class="flex flex-col gap-y-6">
-    <div class="col-start-2">
-      <Breadcrumbs
-        items={[
-          { href: '/blog', label: 'Blog', icon: 'lucide:archive' },
-          { label: post.data.title, icon: 'lucide:file-text' },
-        ]}
-      />
-    </div>
-    <section class="col-start-2 flex flex-col gap-y-6 text-start">
-      <div class="flex flex-col">
-        <h1
-          class="mb-2 text-3xl leading-tight font-medium text-pretty sm:text-5xl"
-        >
-          {post.data.title}
-        </h1>
+  <div class="flex flex-col gap-10">
+    <Breadcrumbs
+      items={[
+        { href: '/blog', label: 'Blog', icon: 'lucide:archive' },
+        { label: post.data.title, icon: 'lucide:file-text' },
+      ]}
+    />
 
-        <div class="flex flex-wrap justify-start gap-2">
-          {
-            post.data.tags && post.data.tags.length > 0 ? (
-              post.data.tags.map((tag) => (
-                <a
-                  href={`/tags/${slugifyTag(tag)}`}
-                  class={badgeVariants({ variant: 'secondary' })}
-                >
-                  <Icon name="lucide:hash" class="size-3" />
-                  {tag}
-                </a>
-              ))
-            ) : (
-              <span class="text-muted-foreground text-sm">
-                No tags available
-              </span>
-            )
-          }
-        </div>
-      </div>
-    </section>
-
-    <div
-      class="text-muted-foreground col-start-2 flex flex-wrap items-center justify-center gap-2 text-sm"
-    >
-      <div class="flex items-center gap-2">
-        <span>{formatDate(post.data.date)}</span>
-        <Separator orientation="vertical" className="h-4!" />
+    <header class="flex max-w-4xl flex-col gap-6">
+      <p class="text-muted-foreground flex flex-wrap gap-x-4 gap-y-1 font-mono text-xs">
+        <time datetime={post.data.date.toISOString()}>
+          {formatDate(post.data.date)}
+        </time>
         <span>{readingTime(post.body!)}</span>
-        <Separator orientation="vertical" className="h-4!" />
         <span>
-          By <a href="/" class="hover:text-foreground underline">Lucas Rouret</a>
+          By{' '}
+          <a href="/" class="hover:text-foreground underline">
+            Lucas Rouret
+          </a>
         </span>
-      </div>
-    </div>
+      </p>
+      <h1 class="font-custom text-foreground text-4xl leading-[1.1] font-bold text-pretty break-words sm:text-6xl">
+        {post.data.title}
+      </h1>
+      {post.data.description && (
+        <p class="text-muted-foreground text-lg">{post.data.description}</p>
+      )}
+      {post.data.tags && post.data.tags.length > 0 && (
+        <ul class="flex flex-wrap gap-2">
+          {post.data.tags.map((tag) => (
+            <li>
+              <a
+                href={`/tags/${slugifyTag(tag)}`}
+                class="border-border text-muted-foreground hover:border-foreground hover:text-foreground inline-flex min-h-9 items-center rounded-full border px-3 text-sm transition-colors"
+              >
+                #{tag}
+              </a>
+            </li>
+          ))}
+        </ul>
+      )}
+    </header>
 
-    {headings.length > 0 && <TableOfContents headings={headings} />}
+    {post.data.image && (
+      <CoverImage
+        src={post.data.image}
+        width={1600}
+        height={900}
+        loading="eager"
+        class="border-border aspect-[16/9] w-full rounded-2xl border object-cover"
+      />
+    )}
 
-    <article class="prose col-start-2 max-w-none" aria-label="Blog post">
-      <Content />
-    </article>
+    <div class="mx-auto flex w-full max-w-3xl flex-col gap-y-8">
+      {headings.length > 0 && <TableOfContents headings={headings} />}
 
-    <aside class="group rounded-xl border p-4">
-      <div class="mb-2">
-        <h2
-          id="skills-title"
-          class="font-custom text-2xl font-bold text-neutral-900 dark:text-white"
-        >
-          Share this post
-        </h2>
-        <p class="text-sm text-neutral-500 dark:text-neutral-400">
-          If you found this post helpful, consider sharing it with your friends
-          or on social media. Your support helps me create more content like
-          this.
+      <article class="prose max-w-none" aria-label="Blog post">
+        <Content />
+      </article>
+
+      <aside class="border-border bg-card rounded-2xl border p-6">
+        <h2 class="font-custom text-foreground text-2xl font-bold">Share this post</h2>
+        <p class="text-muted-foreground mb-4 text-sm">
+          If you found this post helpful, consider sharing it with your friends or on social media. Your support helps me
+          create more content like this.
         </p>
-      </div>
+        <ul class="flex flex-wrap gap-2">
+          {
+            shareLinks.map(({ name, icon, href }) => (
+              <li>
+                <a
+                  href={href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={`Share on ${name}`}
+                  title={`Share on ${name}`}
+                  class={buttonVariants({ variant: 'outline', size: 'icon' })}
+                >
+                  <Icon name={icon} class="size-4" />
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+      </aside>
 
-      <div class="flex flex-wrap gap-2">
-        <Link
-          href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(Astro.site + 'articles/' + post.slug)}`}
-          target="_blank"
-          rel="noopener noreferrer"
-          title="Share on Facebook"
-          aria-label="Share on Facebook"
-        >
-          <Button variant="outline" size="icon" aria-label="Share on Facebook">
-            <Icon name="line-md:facebook" class="size-4" />
-          </Button>
-        </Link>
-        <Link
-          href={`https://twitter.com/intent/tweet?url=${encodeURIComponent(Astro.site + 'articles/' + post.slug)}`}
-          target="_blank"
-          rel="noopener noreferrer"
-          title="Share on Twitter"
-          aria-label="Share on Twitter"
-        >
-          <Button variant="outline" size="icon" aria-label="Share on Twitter">
-            <Icon name="line-md:twitter" class="size-4" />
-          </Button>
-        </Link>
-        <Link
-          href={`https://www.linkedin.com/shareArticle?mini=true&url=${encodeURIComponent(Astro.site + 'articles/' + post.slug)}`}
-          target="_blank"
-          rel="noopener noreferrer"
-          title="Share on LinkedIn"
-          aria-label="Share on LinkedIn"
-        >
-          <Button variant="outline" size="icon" aria-label="Share on LinkedIn">
-            <Icon name="line-md:linkedin" class="size-4" />
-          </Button>
-        </Link>
-        <Link
-          href={`https://www.reddit.com/submit?url=${encodeURIComponent(Astro.site + 'articles/' + post.slug)}`}
-          target="_blank"
-          rel="noopener noreferrer"
-          title="Share on Reddit"
-          aria-label="Share on Reddit"
-        >
-          <Button variant="outline" size="icon" aria-label="Share on Reddit">
-            <Icon name="line-md:reddit-loop" class="size-4" />
-          </Button>
-        </Link>
-        <Link
-          href={`https://wa.me/?text=${encodeURIComponent(Astro.site + 'articles/' + post.slug)}`}
-          target="_blank"
-          rel="noopener noreferrer"
-          title="Share on WhatsApp"
-          aria-label="Share on WhatsApp"
-        >
-          <Button variant="outline" size="icon" aria-label="Share on WhatsApp">
-            <Icon name="mdi:whatsapp" class="size-4" />
-          </Button>
-        </Link>
-        <Link
-          href={`https://t.me/share/url?url=${encodeURIComponent(Astro.site + 'articles/' + post.slug)}`}
-          target="_blank"
-          rel="noopener noreferrer"
-          title="Share on Telegram"
-          aria-label="Share on Telegram"
-        >
-          <Button variant="outline" size="icon" aria-label="Share on Telegram">
-            <Icon name="line-md:telegram" class="size-4" />
-          </Button>
-        </Link>
-        <Link
-          href={`https://pinterest.com/pin/create/button/?url=${encodeURIComponent(Astro.site + 'articles/' + post.slug)}`}
-          target="_blank"
-          rel="noopener noreferrer"
-          title="Share on Pinterest"
-          aria-label="Share on Pinterest"
-        >
-          <Button variant="outline" size="icon" aria-label="Share on Pinterest">
-            <Icon name="mdi:pinterest" class="size-4" />
-          </Button>
-        </Link>
-      </div>
-    </aside>
-
-    <PostNavigation prevPost={prev} nextPost={next} />
-  </section>
+      <PostNavigation prevPost={prev} nextPost={next} />
+    </div>
+  </div>
 
   <Button
     variant="outline"

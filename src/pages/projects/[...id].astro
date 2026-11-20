@@ -1,12 +1,13 @@
 ---
 import Breadcrumbs from '@/components/Breadcrumbs.astro'
 import PageHead from '@/components/PageHead.astro'
-import { badgeVariants } from '@/components/ui/badge'
+import ScreenshotPanel from '@/components/ScreenshotPanel.astro'
+import { buttonVariants } from '@/components/ui/button'
+import SectionHeading from '@/components/SectionHeading.astro'
 import Layout from '@/layouts/Layout.astro'
 import { SITE } from '@/consts'
-import { getAllProjects } from '@/lib/data-utils'
+import { getAllProjects, projectLabel } from '@/lib/data-utils'
 import { Icon } from 'astro-icon/components'
-import { Image } from 'astro:assets'
 import { render } from 'astro:content'
 
 export async function getStaticPaths() {
@@ -19,6 +20,7 @@ export async function getStaticPaths() {
 
 const project = Astro.props
 const { Content } = await render(project)
+const { name, pitch } = project.data
 
 const currentUrl = Astro.url
 const currentUrlString = currentUrl.toString()
@@ -26,29 +28,27 @@ const currentUrlString = currentUrl.toString()
 const structuredData = {
   '@context': 'https://schema.org',
   '@type': 'CreativeWork',
-  headline: project.data.name,
-  name: project.data.name,
+  headline: `${name}: ${pitch}`,
+  name,
   url: currentUrlString,
   mainEntityOfPage: { '@type': 'WebPage', '@id': currentUrlString },
   inLanguage: SITE.locale,
-  datePublished: project.data.startDate || '',
-  dateModified: project.data.endDate || project.data.startDate || '',
+  datePublished: project.data.startDate,
+  dateModified: project.data.endDate ?? project.data.startDate,
   author: { '@id': `${SITE.href}/#person` },
   creator: { '@id': `${SITE.href}/#person` },
   image: new URL(`/image/${project.id}.png`, Astro.site).toString(),
-  keywords: project.data.tags ? project.data.tags.join(', ') : '',
-  description: project.data.description || '',
-  about: project.data.tags
-    ? project.data.tags.map((tag) => ({ '@type': 'Thing', name: tag }))
-    : [],
+  keywords: project.data.tags.join(', '),
+  description: project.data.description,
+  about: project.data.tags.map((tag) => ({ '@type': 'Thing', name: tag })),
   ...(project.data.link && { sameAs: project.data.link }),
 }
 ---
 
-<Layout canonicalUrl={currentUrl} isWide={true}>
+<Layout>
   <PageHead
     slot="head"
-    title={project.data.name}
+    title={name}
     description={project.data.description}
   />
   <script
@@ -56,56 +56,37 @@ const structuredData = {
     is:inline
     set:html={JSON.stringify(structuredData)}
   />
-  <section
-    class="grid max-w-[calc(100vw-2rem)] grid-cols-[minmax(0px,1fr)_min(calc(var(--breakpoint-lg)-2rem),100%)_minmax(0px,1fr)] gap-y-6"
-  >
-    <div class="col-start-2">
-      <Breadcrumbs
-        items={[
-          { href: '/projects', label: 'Projects', icon: 'lucide:folder' },
-          { label: project.data.name, icon: 'lucide:folder-open' },
-        ]}
-      />
-    </div>
-    <section class="col-start-2 flex flex-col gap-y-6 text-start">
-      <div class="flex flex-col">
-        <h1
-          class="mb-2 text-3xl leading-tight font-medium text-pretty sm:text-5xl"
-        >
-          {project.data.name}
-        </h1>
-
-        <div class="flex flex-wrap justify-start gap-2">
-          {
-            project.data.tags && project.data.tags.length > 0 ? (
-              project.data.tags.map((tag) => (
-                <span class={badgeVariants({ variant: 'secondary' })}>
-                  <Icon name="lucide:hash" class="size-3" />
-                  {tag}
-                </span>
-              ))
-            ) : (
-              <span class="text-muted-foreground text-sm">
-                No tags available
-              </span>
-            )
-          }
-        </div>
-      </div>
-    </section>
-
-    <Image
-      src={project.data.image}
-      alt={project.data.name}
-      class="col-start-2 mb-8 h-[500px] w-full rounded-3xl object-cover"
-      loading="lazy"
-      fetchpriority="low"
-      width={1200}
-      height={800}
+  <div class="flex flex-col gap-10 pb-28">
+    <Breadcrumbs
+      items={[
+        { href: '/projects', label: 'Projects', icon: 'lucide:folder' },
+        { label: name, icon: 'lucide:folder-open' },
+      ]}
     />
+    <header class="flex flex-col gap-6 pt-6 sm:pt-12">
+      <p class="text-muted-foreground text-sm">
+        {projectLabel(project)}
+      </p>
+      <SectionHeading as="h1">{name}.</SectionHeading>
+      <p class="text-muted-foreground max-w-2xl text-lg">{pitch}</p>
+      {
+        project.data.link && (
+          <a
+            href={project.data.link}
+            target="_blank"
+            rel="noopener"
+            class={buttonVariants({ variant: 'contrast', size: 'pill', className: 'w-fit' })}
+          >
+            Visit website <Icon name="lucide:arrow-up-right" class="size-4" />
+          </a>
+        )
+      }
+    </header>
 
-    <article class="prose col-start-2 max-w-none" aria-label="Project">
+    <ScreenshotPanel src={project.data.image} alt={name} loading="eager" class="rounded-2xl" />
+
+    <article class="prose max-w-3xl" aria-label="Project">
       <Content />
     </article>
-  </section>
+  </div>
 </Layout>

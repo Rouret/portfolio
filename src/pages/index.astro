@@ -1,177 +1,327 @@
 ---
-import LatestArticles from '@/components/LatestArticles.astro'
+import ArticleCard from '@/components/ArticleCard.astro'
+import { buttonVariants } from '@/components/ui/button'
+import ProjectCard from '@/components/ProjectCard.astro'
+import SectionHeading from '@/components/SectionHeading.astro'
 import PageHead from '@/components/PageHead.astro'
-import NotesExplorer from '@/components/react/notes-explorer'
-import { SITE } from '@/consts'
+import { SOCIAL_LINKS } from '@/consts'
 import Layout from '@/layouts/Layout.astro'
 import { getAllArticles, getAllProjects } from '@/lib/data-utils'
-import { notesTree } from '@/lib/notes'
 import { Icon } from 'astro-icon/components'
 import { Image } from 'astro:assets'
 
 import me from '../assets/me.jpg'
 
-const currentUrl = Astro.url
 const projects = await getAllProjects()
-const currentProjects = ['swelly', 'dancs']
-  .map((id) => projects.find((project) => project.id === id))
-  .filter((project) => project !== undefined)
-const allArticles = await getAllArticles()
+const [featured, ...recent] = (await getAllArticles()).slice(0, 4)
+
+const values = [
+  {
+    title: 'Whole products.',
+    text: 'Mobile, web, backend, data pipelines. I take an idea from a sketch to the store.',
+  },
+  {
+    title: 'Lean at heart.',
+    text: 'Small batches, visible flow, root causes over blame, continuous improvement. Process is part of the product.',
+  },
+  {
+    title: 'Agents as teammates.',
+    text: 'I design',
+    link: {
+      label: 'AI agent workflows',
+      href: '/articles/agents-write-good-code-trust-is-the-bottleneck',
+    },
+    after: 'with guardrails, so speed never costs trust.',
+  },
+  {
+    title: 'Any scale.',
+    text: 'From landing pages to complex software, for big tech, startups, or my own products as a solopreneur.',
+  },
+]
+
+const road = [
+  {
+    year: '2026',
+    title: 'Lyn Météo',
+    detail: 'Free, ad-free weather app for every town in France. Built and run solo, rated 5/5 on the stores.',
+    kind: 'Product, side project',
+    personal: true,
+  },
+  {
+    year: '2024',
+    title: 'Swelly',
+    detail: 'Surf forecasts made reliable and easy to read. Four friends learning to shape a product together, with me leading the tech.',
+    kind: 'Product, side project',
+    personal: true,
+  },
+  {
+    year: '2023–2026',
+    title: 'Full-stack developer, Theodo',
+    detail: 'Web and mobile consulting for large companies. I ran our team flow in Kanban and co-built solutions with clients in workshops.',
+    kind: 'Work',
+    projects: [
+      {
+        title: 'Business neobank onboarding',
+        detail: 'A fully online account opening flow for professionals, in React Native and NestJS. Team of 5 inside a 60-person project.',
+      },
+      {
+        title: 'Dealer ordering tool',
+        detail: 'A Next.js ordering tool for every dealer of a brand. Ordering went from several days to under 20 minutes.',
+      },
+      {
+        title: 'Wound care mobile app',
+        detail: 'A health app that helps patients manage and track their wounds over time.',
+      },
+      {
+        title: 'Gentle Mates team app',
+        detail: 'Contributed to the mobile app of the Gentle Mates esports team.',
+      },
+      {
+        title: 'No-code SaaS for private tutors',
+        detail: 'Three months with an entrepreneur, building a SaaS for private tutors entirely with no-code tools.',
+      },
+    ],
+  },
+  {
+    year: '2021–2023',
+    title: 'Tools for Guild Wars 2 streamers',
+    detail: 'Scripts and add-ons for Twitch streamers playing Guild Wars 2.',
+    kind: 'Side project',
+    personal: true,
+  },
+  {
+    year: '2020–2023',
+    title: 'Work-study, IMT Atlantique and U Tech',
+    detail: 'Three years alternating between engineering school and a full-stack job.',
+    kind: 'Education, work',
+    projects: [
+      {
+        title: 'Software engineering degree, IMT Atlantique',
+        detail: 'Master-level engineering school in Nantes, part of the Institut Mines-Télécom.',
+      },
+      {
+        title: 'Full-stack developer, U Tech',
+        detail: 'In a retail group IT team: web apps, a store shelf detection AI, and a nightly job cut from 20 minutes to 2.',
+      },
+    ],
+  },
+  {
+    year: '2019–2021',
+    title: 'A mobile app for local events',
+    detail: 'My first try at launching a product. It did not take off, and taught me a lot.',
+    kind: 'Product, side project',
+    personal: true,
+  },
+  {
+    year: '2018–2020',
+    title: 'Networks and telecommunications degree, IUT Annecy',
+    detail: 'Two-year technical degree (DUT) at the Université Savoie Mont Blanc.',
+    kind: 'Education',
+  },
+]
+
+const stack = ['React', 'React Native', 'Expo', 'TypeScript', 'Node.js', 'Python', 'REST']
+
 ---
 
-<Layout canonicalUrl={currentUrl}>
-  <PageHead slot="head" title="Confirmé Full Stack Developer" />
-  <section class="flex flex-col gap-y-12 px-4 py-8 sm:px-8 lg:px-16">
-    <div
-      class="flex flex-col items-center text-center sm:flex-row sm:items-start sm:gap-8 sm:text-left"
-    >
-      <div
-        class="relative overflow-hidden rounded-lg sm:shrink-0 sm:overflow-hidden sm:rounded-lg"
-      >
-        <Image
-          src={me}
-          alt="Logo"
-          width={200}
-          height={200}
-          class="relative overflow-hidden rounded-lg sm:shrink-0 sm:overflow-hidden sm:rounded-lg"
-        />
-      </div>
-      <div class="mt-8 sm:mt-0 sm:max-w-xl">
+<Layout>
+  <PageHead slot="head" title="Full-Stack and Mobile Software Engineer" />
+
+  <div class="flex flex-col">
+    <section class="reveal flex flex-col gap-10 pt-10 pb-20 sm:pt-20">
+      <div class="flex flex-col gap-6">
         <h1
-          class="font-custom text-foreground text-start text-4xl font-extrabold sm:text-5xl"
+          class="font-custom text-foreground text-5xl leading-[1.05] font-bold sm:text-7xl lg:text-8xl"
         >
-          {SITE.title}
+          I <span class="text-primary">build</span> products<br />
+          end to end, <span class="text-muted-foreground">and the{' '}<br class="hidden sm:block" />
+          systems that <span class="text-primary">ship</span> them.</span>
         </h1>
-        <div class="mt-4 flex items-center gap-2" aria-label="location">
-          <span
-            class="bg-primary text-primary-foreground ring-primary/30 rounded-full px-3 py-1 text-sm font-medium ring-1"
-          >
-            I'm from
-          </span>
-          <span class="flex items-center gap-1">
-            <span class="text-foreground text-sm font-medium">
-              {SITE.location}</span
-            >
-            <svg
-              viewBox="0 0 36 36"
-              class="h-6 w-6 transition-transform duration-500 hover:rotate-12"
-              aria-hidden="true"
-              role="img"
-              focusable="false"
-              aria-labelledby="title"
-              xmlns="http://www.w3.org/2000/svg"
-              xmlns:xlink="http://www.w3.org/1999/xlink"
-              aria-hidden="true"
-              role="img"
-              class="iconify iconify--twemoji"
-              preserveAspectRatio="xMidYMid meet"
-              fill="#000000"
-              ><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g
-                id="SVGRepo_tracerCarrier"
-                stroke-linecap="round"
-                stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"
-                ><path
-                  fill="#ED2939"
-                  d="M36 27a4 4 0 0 1-4 4h-8V5h8a4 4 0 0 1 4 4v18z"></path><path
-                  fill="#002495"
-                  d="M4 5a4 4 0 0 0-4 4v18a4 4 0 0 0 4 4h8V5H4z"></path><path
-                  fill="#EEE"
-                  d="M12 5h12v26H12z"></path></g
-              ></svg
-            >
-          </span>
-        </div>
-        <p
-          class="text-md text-foreground mt-4 text-start font-sans"
-          title="description"
-          aria-label="description"
-        >
-          {SITE.description}
-        </p>
+        <p class="text-muted-foreground text-lg">Software engineer, full stack and mobile.</p>
       </div>
-    </div>
-
-    {
-      currentProjects.length > 0 && (
-        <section class="relative" aria-labelledby="current-project-title">
-          <h2
-            id="current-project-title"
-            class="font-custom text-foreground text-2xl font-bold"
-            title="current project"
-            aria-label="current project"
-            role="heading"
-          >
-            What I'm Working On
-          </h2>
-          <p
-            class="text-muted-foreground text-sm"
-            aria-label="current project description"
-          >
-            Outside of my day job, these are the projects I'm currently pouring
-            my time into.
-          </p>
-          <div class="mt-4 flex flex-col gap-4">
-            {currentProjects.map((project) => (
-              <a
-                href={`/projects/${project.id}`}
-                class="group bg-card border-card-foreground/10 flex flex-col overflow-hidden rounded-2xl border transition-all duration-300 hover:shadow-lg sm:flex-row"
-                aria-label={`See ${project.data.name} project`}
-              >
-                <div class="aspect-[16/10] w-full overflow-hidden sm:w-72 sm:shrink-0">
-                  <Image
-                    alt={project.data.name}
-                    src={project.data.image}
-                    class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                    loading="lazy"
-                    width={600}
-                    height={375}
-                  />
-                </div>
-                <div class="flex flex-1 flex-col justify-between p-5">
-                  <div>
-                    <h3 class="text-foreground mb-2 text-xl font-medium">
-                      {project.data.name}
-                    </h3>
-                    <p class="text-muted-foreground mb-4 text-sm">
-                      {project.data.description}
-                    </p>
-                  </div>
-                  <div class="flex flex-wrap gap-2">
-                    {project.data.tags?.map((tag) => (
-                      <span class="bg-primary/10 text-primary rounded-full px-2 py-1 text-xs font-medium">
-                        {tag}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-                <div class="flex items-center p-5 sm:pl-0">
-                  <Icon
-                    name="lucide:arrow-right"
-                    class="size-5 transition-transform group-hover:translate-x-1"
-                  />
-                </div>
-              </a>
-            ))}
-          </div>
-        </section>
-      )
-    }
-
-    <LatestArticles />
-
-    <section class="flex flex-col gap-y-4" aria-labelledby="notes-title">
-      <div>
-        <h2
-          id="notes-title"
-          class="font-custom text-foreground text-2xl font-bold"
+      <div class="flex flex-wrap items-center gap-3">
+        <a
+          href="#work"
+          class={buttonVariants({ variant: 'contrast', size: 'pill' })}
         >
-          Explore by Topic
-        </h2>
-        <p class="text-muted-foreground text-sm">
-          Articles grouped around the subjects I keep coming back to.
-        </p>
+          See my work <Icon name="lucide:arrow-down" class="size-4" />
+        </a>
+        <a
+          href="#contact"
+          class={buttonVariants({ variant: 'outline', size: 'pill' })}
+        >
+          Get in touch
+        </a>
       </div>
-      <NotesExplorer client:load notes={notesTree} articles={allArticles} />
     </section>
-  </section>
+
+    <section class="reveal border-border grid gap-8 border-t pt-8 pb-24 sm:grid-cols-2 lg:grid-cols-4">
+      {
+        values.map((value) => (
+          <div class="flex flex-col gap-2">
+            <h2 class="text-foreground text-lg font-medium">{value.title}</h2>
+            <p class="text-muted-foreground text-sm leading-relaxed">
+              {value.text}
+              {value.link && ' '}
+              {value.link && (
+                <a
+                  href={value.link.href}
+                  class="text-foreground decoration-primary underline decoration-2 underline-offset-4 hover:decoration-foreground"
+                >
+                  {value.link.label}
+                </a>
+              )}
+              {value.after && ` ${value.after}`}
+            </p>
+          </div>
+        ))
+      }
+    </section>
+
+    <section class="reveal grid items-start gap-10 pb-28 md:grid-cols-[2fr_3fr]">
+      <Image
+        src={me}
+        alt="Lucas Rouret"
+        width={560}
+        height={560}
+        class="aspect-square w-full rounded-2xl object-cover"
+      />
+      <div class="flex flex-col gap-5">
+        <h2 class="font-custom text-foreground flex items-center gap-4 text-4xl font-bold sm:text-5xl">
+          Lucas Rouret.
+          <svg viewBox="0 0 3 2" class="h-7 w-auto rounded-sm sm:h-8" role="img" aria-label="France">
+            <rect width="1" height="2" fill="#002495" />
+            <rect x="1" width="1" height="2" fill="#EEE" />
+            <rect x="2" width="1" height="2" fill="#ED2939" />
+          </svg>
+        </h2>
+        <p class="text-foreground text-lg leading-relaxed">
+          I'm a full-stack engineer who likes owning the whole thing: the app people
+          touch, the backend behind it, and the way the team builds it.
+        </p>
+        <p class="text-muted-foreground leading-relaxed">
+          By day I ship production software. Outside of it I build my own products, from
+          weather and surf apps used every morning to a Rust replay engine, because the
+          fastest way to learn a stack is to ship something real with it.
+        </p>
+        <p class="text-muted-foreground leading-relaxed">
+          Lately I spend a lot of time on AI agents: how to split the work, what evidence
+          to ask for, and which guardrails let you merge with confidence.
+        </p>
+        <ul class="flex flex-wrap gap-2" aria-label="Stack">
+          {
+            stack.map((tech) => (
+              <li class="border-border text-foreground rounded-full border px-3 py-1 text-xs font-medium">{tech}</li>
+            ))
+          }
+        </ul>
+      </div>
+    </section>
+
+    <section id="work" class="reveal flex scroll-mt-24 flex-col gap-8 pb-28">
+      <div class="flex items-end justify-between gap-4">
+        <SectionHeading>Selected work.</SectionHeading>
+        <a href="/projects" class="text-foreground inline-flex min-h-11 shrink-0 items-center gap-1 text-sm font-medium hover:underline">
+          All projects <Icon name="lucide:arrow-up-right" class="size-4" />
+        </a>
+      </div>
+      <div class="flex flex-col gap-6">
+        {projects.map((project) => <ProjectCard project={project} />)}
+      </div>
+    </section>
+
+    <section class="reveal flex flex-col gap-8 pb-28">
+      <div class="flex items-end justify-between gap-4">
+        <SectionHeading>Writing.</SectionHeading>
+        <a href="/blog" class="text-foreground inline-flex min-h-11 shrink-0 items-center gap-1 text-sm font-medium hover:underline">
+          All articles <Icon name="lucide:arrow-up-right" class="size-4" />
+        </a>
+      </div>
+
+      {featured && <ArticleCard article={featured} featured />}
+
+      <div class="grid gap-6 sm:grid-cols-3">
+        {recent.map((article) => <ArticleCard article={article} />)}
+      </div>
+    </section>
+
+    <section class="reveal flex flex-col gap-10 pb-28">
+      <SectionHeading>The road so far.</SectionHeading>
+      <ol class="flex flex-col">
+        {
+          road.map((step) => (
+            <li class="grid sm:grid-cols-[10rem_1fr]">
+              <p class="font-custom text-foreground hidden self-start text-xl font-bold sm:sticky sm:top-28 sm:block">
+                {step.year}
+              </p>
+              <div class="border-border relative flex flex-col gap-2 border-l pb-12 pl-8">
+                <span
+                  class:list={[
+                    'border-primary ring-background absolute top-2 -left-[7px] size-3.5 rounded-full border-2 ring-4',
+                    step.personal ? 'bg-background' : 'bg-primary',
+                  ]}
+                />
+                <p class="font-custom text-foreground text-xl font-bold sm:hidden">{step.year}</p>
+                <div class="flex flex-wrap items-center gap-x-3 gap-y-1">
+                  <h3 class="text-foreground text-lg font-medium">{step.title}</h3>
+                  <span class="border-border text-muted-foreground rounded-full border px-2.5 py-0.5 text-xs">
+                    {step.kind}
+                  </span>
+                </div>
+                <p class="text-muted-foreground max-w-2xl text-sm leading-relaxed">{step.detail}</p>
+                {step.projects && (
+                  <ul class="mt-3 grid gap-3 sm:grid-cols-2">
+                    {step.projects.map((project) => (
+                      <li class="border-border bg-card flex flex-col gap-1 rounded-xl border p-4">
+                        <h4 class="text-foreground text-sm font-medium">{project.title}</h4>
+                        <p class="text-muted-foreground text-sm leading-relaxed">{project.detail}</p>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            </li>
+          ))
+        }
+      </ol>
+    </section>
+
+    <section id="contact" class="reveal border-border flex flex-col gap-6 border-t py-24">
+      <h2 class="font-custom text-foreground text-5xl leading-tight font-bold sm:text-7xl">
+        Let's build<br />something.
+      </h2>
+      <div class="flex flex-wrap gap-3">
+        {
+          SOCIAL_LINKS.filter((link) => link.label !== 'RSS').map((link) => (
+            <a
+              href={link.href}
+              target="_blank"
+              rel="noopener"
+              class={buttonVariants({ variant: 'outline', size: 'pill' })}
+            >
+              {link.label} <Icon name="lucide:arrow-up-right" class="size-4" />
+            </a>
+          ))
+        }
+      </div>
+    </section>
+  </div>
 </Layout>
+
+<style>
+  @media (prefers-reduced-motion: no-preference) {
+    @supports (animation-timeline: view()) {
+      .reveal {
+        animation: reveal linear both;
+        animation-timeline: view();
+        animation-range: entry 0% entry 30%;
+      }
+    }
+  }
+  @keyframes reveal {
+    from {
+      opacity: 0;
+      transform: translateY(24px);
+    }
+  }
+</style>

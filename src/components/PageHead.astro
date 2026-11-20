@@ -1,5 +1,5 @@
 ---
-import { SITE } from '@/consts'
+import { BLOG_DESCRIPTION, SITE } from '@/consts'
 import { getAllArticles } from '@/lib/data-utils'
 import { truncateOnWordBoundary } from '@/lib/utils'
 interface Props {
@@ -93,8 +93,7 @@ const pageTitle =
       '@type': 'Blog',
       '@id': `${SITE.href}/blog#blog`,
       name: `${SITE.title} Blog`,
-      description:
-        'Technology blog covering web development, programming, and software engineering topics',
+      description: BLOG_DESCRIPTION,
       url: `${SITE.href}/blog`,
       author: {
         '@id': `${SITE.href}/#person`,

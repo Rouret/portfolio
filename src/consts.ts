@@ -3,12 +3,15 @@ import type { IconMap, Site, SocialLink } from '@/types'
 export const SITE: Site = {
   title: 'Lucas Rouret',
   description:
-    'Passionate about software development, I adapt quickly to any environment and learn fast. I prioritize methodology and continuous improvement over overproduction, convinced that every mistake or delay is a learning opportunity. Curious and versatile, a true Swiss Army knife, I am seeking an exciting professional experience where I can tackle diverse challenges and deliver real value.',
+    'Full-stack and mobile software engineer in France. React, React Native, Node.js, Python, AI agent workflows, Lean. I build my own apps too.',
   href: 'https://www.lucas-rouret.fr',
   author: 'Lucas Rouret',
   locale: 'en-US',
   location: 'France',
 }
+
+export const BLOG_DESCRIPTION =
+  'Articles on React, React Native and Expo, AI agents, Lean and agile, and building products as a solopreneur.'
 
 export const NAV_LINKS: SocialLink[] = [
   {
@@ -22,6 +25,10 @@ export const NAV_LINKS: SocialLink[] = [
   {
     href: '/blog',
     label: 'blog',
+  },
+  {
+    href: '/library',
+    label: 'library',
   },
 ]
 

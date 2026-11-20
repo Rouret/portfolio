@@ -10,7 +10,7 @@ const articles = defineCollection({
       description: z.string(),
       date: z.coerce.date(),
       updatedDate: z.coerce.date().optional(),
-      image: image().optional(),
+      image: z.union([image(), z.string().url()]).optional(),
       tags: z.array(z.string()).optional(),
       authors: z.array(z.string()).optional(),
       draft: z.boolean().optional(),
@@ -23,11 +23,13 @@ const projects = defineCollection({
   schema: ({ image }) =>
     z.object({
       name: z.string(),
+      pitch: z.string(),
+      kind: z.string(),
       description: z.string(),
       tags: z.array(z.string()),
       image: image(),
       link: z.string().url().optional(),
-      startDate: z.coerce.date().optional(),
+      startDate: z.coerce.date(),
       endDate: z.coerce.date().optional(),
     }),
 })
