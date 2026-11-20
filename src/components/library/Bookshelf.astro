@@ -1,0 +1,195 @@
+---
+import { Image } from 'astro:assets'
+import { amazonUrl, BOOKS, THEME_LABELS } from './books'
+---
+
+<div data-library class="flex flex-col gap-12">
+  <div
+    data-shelf
+    class="aspect-square max-h-[620px] w-full scroll-mt-20 overflow-hidden sm:aspect-[16/10]"
+  >
+  </div>
+  <script is:inline>
+    ;(function () {
+      var host = document.querySelector('[data-shelf]')
+      var canvas = document.createElement('canvas')
+      var webgl = false
+      try {
+        webgl = !!canvas.getContext('webgl2')
+      } catch (e) {}
+      host.hidden = !webgl || matchMedia('(prefers-reduced-motion: reduce)').matches
+    })()
+  </script>
+
+  <ol class="border-border border-b">
+    {
+      BOOKS.map((book) => (
+        <li class="border-border border-t">
+          <button
+            type="button"
+            data-open-book={book.id}
+            aria-haspopup="dialog"
+            class="group hover:bg-card flex w-full cursor-pointer items-center gap-4 px-1 py-5 text-left transition-colors sm:px-3"
+          >
+            <Image
+              src={book.cover}
+              alt=""
+              width={96}
+              class="border-border h-auto w-12 shrink-0 rounded-sm border"
+            />
+            <span class="flex min-w-0 grow flex-col gap-1">
+              <span lang={book.lang} class="font-custom text-foreground text-xl font-bold sm:text-2xl">
+                {book.title}
+              </span>
+              <span class="text-muted-foreground text-sm">{book.author}</span>
+            </span>
+            <span class="text-muted-foreground hidden shrink-0 text-xs tracking-widest uppercase sm:inline">
+              {THEME_LABELS[book.theme]}
+            </span>
+          </button>
+        </li>
+      ))
+    }
+  </ol>
+
+  {
+    BOOKS.map((book) => (
+      <dialog
+        id={`book-${book.id}`}
+        aria-labelledby={`book-${book.id}-title`}
+        class="bg-background text-foreground border-border fixed top-auto right-0 bottom-0 left-0 m-0 max-h-[52dvh] w-full max-w-none z-60 overflow-y-auto rounded-t-2xl border-t p-6 shadow-2xl md:top-0 md:left-auto md:h-dvh md:max-h-none md:max-w-md md:rounded-none md:border-t-0 md:border-l md:p-10"
+      >
+        <div class="flex flex-col gap-6">
+          <div class="flex items-start justify-between gap-4">
+            <p class="text-muted-foreground text-xs tracking-widest uppercase">
+              {THEME_LABELS[book.theme]}
+            </p>
+            <form method="dialog">
+              <button
+                class="border-border text-muted-foreground hover:text-foreground hover:border-foreground inline-flex min-h-10 cursor-pointer items-center rounded-full border px-4 text-sm transition-colors"
+              >
+                Close
+              </button>
+            </form>
+          </div>
+          <header class="flex gap-5">
+            <Image
+              src={book.cover}
+              alt={`Cover of ${book.title}`}
+              width={240}
+              loading="eager"
+              class="border-border h-auto w-24 shrink-0 self-start rounded-sm border shadow-sm md:w-28"
+            />
+            <div lang={book.lang} class="flex min-w-0 flex-col gap-2">
+              <h2
+                id={`book-${book.id}-title`}
+                class="font-custom text-2xl font-bold sm:text-3xl"
+              >
+                {book.title}
+              </h2>
+              {book.subtitle && <p class="text-foreground text-sm">{book.subtitle}</p>}
+              <p class="text-muted-foreground text-sm">{book.author}</p>
+            </div>
+          </header>
+          <a
+            href={amazonUrl(book)}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="border-border text-foreground hover:border-foreground inline-flex min-h-10 items-center gap-2 self-start rounded-full border px-4 text-sm transition-colors"
+          >
+            See it on Amazon <span aria-hidden="true">↗</span>
+            <span class="sr-only">(opens in a new tab)</span>
+          </a>
+          <section class="border-border flex flex-col gap-2 border-t pt-6">
+            <h3 class="font-custom text-lg font-bold">What it is</h3>
+            <p class="text-muted-foreground leading-relaxed">{book.whatItIs}</p>
+          </section>
+          <section class="border-border flex flex-col gap-2 border-t pt-6">
+            <h3 class="font-custom text-lg font-bold">Why I love it</h3>
+            <p class="text-muted-foreground leading-relaxed">
+              {book.whyILoveIt}
+            </p>
+            {book.article && (
+              <p class="text-muted-foreground text-sm">
+                I wrote about it in{' '}
+                <a
+                  href={book.article.href}
+                  class="text-foreground decoration-primary underline decoration-2 underline-offset-4 hover:decoration-foreground"
+                >
+                  {book.article.label}
+                </a>.
+              </p>
+            )}
+          </section>
+        </div>
+      </dialog>
+    ))
+  }
+</div>
+
+<script>
+  import { BOOKS } from './books'
+
+  import type { Selection } from './shelf'
+
+  const root = document.querySelector<HTMLElement>('[data-library]')!
+  const host = root.querySelector<HTMLElement>('[data-shelf]')!
+  const dialogFor = (id: string) => document.getElementById(`book-${id}`) as HTMLDialogElement
+  let shelf: { select(selection: Selection): void } | null = null
+  let selectedId: string | null = null
+  let opener: HTMLElement | null = null
+
+  const isBottomSheet = (panel: DOMRect) => panel.left <= 0
+
+  function freeAreaBeside(panel: DOMRect) {
+    return isBottomSheet(panel)
+      ? new DOMRect(0, 0, window.innerWidth, panel.top)
+      : new DOMRect(0, 0, panel.left, window.innerHeight)
+  }
+
+  function select(id: string | null) {
+    if (id === selectedId) return
+    const previous = selectedId
+    selectedId = id
+    if (previous) dialogFor(previous).close()
+    else if (document.activeElement instanceof HTMLButtonElement) opener = document.activeElement
+
+    if (!id) {
+      shelf?.select(null)
+      opener?.focus()
+      opener = null
+      return
+    }
+    const dialog = dialogFor(id)
+    dialog.show()
+    dialog.querySelector<HTMLElement>('form button')!.focus()
+    if (!shelf) return
+    const panel = dialog.getBoundingClientRect()
+    if (isBottomSheet(panel)) host.scrollIntoView({ block: 'start' })
+    shelf.select({ id, free: freeAreaBeside(panel) })
+  }
+
+  root.querySelectorAll<HTMLButtonElement>('[data-open-book]').forEach((button) => {
+    button.addEventListener('click', () => select(button.dataset.openBook!))
+  })
+
+  BOOKS.forEach(({ id }) => {
+    dialogFor(id).addEventListener('close', () => {
+      if (selectedId === id) select(null)
+    })
+  })
+
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape') select(null)
+  })
+
+  if (!host.hidden) {
+    Promise.all([
+      import('./shelf'),
+      document.fonts.load('bold 20px ClashDisplay'),
+      document.fonts.load('20px Lexend'),
+    ]).then(([{ createShelf }]) => {
+      shelf = createShelf(host, BOOKS, select)
+    })
+  }
+</script>

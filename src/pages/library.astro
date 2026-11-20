@@ -1,0 +1,26 @@
+---
+import Bookshelf from '@/components/library/Bookshelf.astro'
+import PageHead from '@/components/PageHead.astro'
+import SectionHeading from '@/components/SectionHeading.astro'
+import Layout from '@/layouts/Layout.astro'
+---
+
+<Layout canonicalUrl={Astro.url}>
+  <PageHead
+    slot="head"
+    title="Library"
+    description="The books on entrepreneurship, management and mindset that shaped how Lucas Rouret works, and why he loves them."
+  />
+
+  <div class="flex flex-col gap-12">
+    <header class="flex flex-col gap-4 pt-6 sm:pt-10">
+      <SectionHeading as="h1">Library.</SectionHeading>
+      <p class="text-muted-foreground max-w-2xl text-lg">
+        The books on entrepreneurship, management and mindset that shaped how I work. Pick
+        one to see why it stays on my shelf.
+      </p>
+    </header>
+
+    <Bookshelf />
+  </div>
+</Layout>

@@ -66,6 +66,13 @@ export const GET: APIRoute = async (context) => {
   })
 
   urls.push({
+    loc: `${baseUrl}/library/`,
+    lastmod: formatDate(now),
+    changefreq: 'monthly',
+    priority: 0.6,
+  })
+
+  urls.push({
     loc: `${baseUrl}/tags/`,
     lastmod: formatDate(latestTagsDate),
     changefreq: 'weekly',
