@@ -16,6 +16,7 @@ export function resolveNoteArticles(
       return article
     })
     .filter((article): article is ArticleWithSlug => Boolean(article))
+    .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())
 }
 
 export function countNoteArticles(note: Note): number {
