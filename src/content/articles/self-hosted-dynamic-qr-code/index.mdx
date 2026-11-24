@@ -12,6 +12,8 @@ authors:
   - 'Lucas Rouret'
 ---
 
+import { buttonVariants } from '@/components/ui/button'
+
 I wanted what Tapit, Linktree and every "dynamic QR code" service sell: print a QR code once, change where it points whenever I want, and land people on a nice personal page with my links. Every one of them wants a monthly subscription for it.
 
 That's not the real problem though. The real problem is **lock-in**. A dynamic QR code from these services encodes _their_ URL, not yours. If the service shuts down, changes its pricing, or you simply stop paying, every QR code you printed on a business card, a flyer or a sticker dies with it.
@@ -160,6 +162,8 @@ Scans per code, in one line.
 
 Then I wanted the other half of what these services sell: scan, and land on a personal page with my links, not on a bare redirect.
 
+<a href="https://redirect.lyn-cloud.online" target="_blank" rel="noopener" class={`${buttonVariants({ variant: 'contrast', size: 'pill' })} not-prose no-underline`}>See it live ↗</a>
+
 The page is **one `index.html` file**, served statically by the same Nginx. No framework, no build step, no external dependency. Redirects stay in place: a code in the map still redirects, everything else shows the page.
 
 ```nginx
@@ -186,25 +190,6 @@ A trick I used the whole time: upload as `preview.html` first. Thanks to `try_fi
 - A "Contact me" button, another prefilled `mailto:` ("I need: a tool / a website / a mobile app").
 
 Everything is inlined in the HTML. The photo and favicons are **base64 data URIs**, the flags are inline SVG (flag emojis don't render on Windows). A small Python script replaces `{{PHOTO}}`, `{{SWELLY}}` and `{{VENU}}` markers in a `template.html` with the encoded files and writes `index.html`. About 55 KB, one request, nothing that can break later.
-
-## Design: what I kept, what I threw away
-
-A link page is the first thing people see after scanning, so I spent more time here than on the server.
-
-**Kept:**
-
-- **A glass card**: semi-transparent white background with `backdrop-filter: blur() saturate()`.
-- **Liquid Glass style borders**: an `::after` pseudo-element with a white `conic-gradient`, cut into a ring with `mask` and `mask-composite: exclude`. The gradient angle is a CSS variable, `--light-angle`, driven from JS, so the highlight slides around the edges as you move your phone.
-- **3D tilt**: the card rotates with `rotateX` / `rotateY` from `--tilt-x` and `--tilt-y`.
-- **Motion input**: the mouse on desktop (`pointermove`), the gyroscope on mobile (`deviceorientation`, `gamma` and `beta`). iOS requires `DeviceOrientationEvent.requestPermission()` from a user gesture, so I ask on first touch. Without any input, a slow sine oscillation keeps the card alive. Everything is smoothed in a `requestAnimationFrame` loop with `current += (target - current) * 0.06`.
-- **The background**: white, three blurred halos (blue-grey, sand, silver) drifting slowly, and a dot grid faded with a gradient mask. Halos and dots shift in the opposite direction of the tilt, which gives a light sense of depth.
-- **Accessibility**: `prefers-reduced-motion` turns every animation off, tap targets are at least 44 px, keyboard focus is visible with `:focus-visible`.
-
-**Thrown away:**
-
-- A colorful "aurora" background (purple, teal, pink). Too flashy.
-- **A 3D mountain in Three.js**: fractal noise terrain, snow based on altitude and slope, fog, snowflakes. Fun to build. But it looked cheap, it was heavier (Three.js from a CDN), and on mobile the card hid almost all of it. Hard to justify.
-- **Real Liquid Glass refraction**, distorting the background with an SVG `feDisplacementMap` inside `backdrop-filter`. It only works in Chrome. Most scans come from iPhones. Easy call.
 
 ## Traps I fell into
 
