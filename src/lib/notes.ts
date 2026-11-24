@@ -55,6 +55,13 @@ export const notesTree: Note[] = [
     ],
   },
   {
+    slug: 'self-hosting',
+    title: 'Self-Hosting',
+    description: 'Replacing paid services with what already runs on my own server.',
+    emoji: '🖥️',
+    articleSlugs: ['self-hosted-dynamic-qr-code-nginx'],
+  },
+  {
     slug: 'entrepreneurship',
     title: 'Entrepreneurship',
     description: 'Lessons from building a startup from scratch.',

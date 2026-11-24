@@ -1,0 +1,234 @@
+---
+title: 'I Replaced a Paid Dynamic QR Code Service With 10 Lines of Nginx'
+slug: 'self-hosted-dynamic-qr-code-nginx'
+description: "Dynamic QR codes and link-in-bio pages like Tapit, Linktree or QR Code Generator Pro charge a monthly fee and own every code you print. Here's how I built the same thing on a VPS I was already paying for: an Nginx map for redirects, a single static HTML page, no app, no database, zero extra cost."
+date: 2026-11-24
+image: '../../../assets/blog/self-hosted-qr/cover.jpg'
+tags:
+  - 'Self-Hosting'
+  - 'Nginx'
+  - 'Indie Hacking'
+authors:
+  - 'Lucas Rouret'
+---
+
+I wanted what Tapit, Linktree and every "dynamic QR code" service sell: print a QR code once, change where it points whenever I want, and land people on a nice personal page with my links. Every one of them wants a monthly subscription for it.
+
+That's not the real problem though. The real problem is **lock-in**. A dynamic QR code from these services encodes _their_ URL, not yours. If the service shuts down, changes its pricing, or you simply stop paying, every QR code you printed on a business card, a flyer or a sticker dies with it.
+
+I already had a VPS running other projects. Turns out that's all you need.
+
+## The idea
+
+A QR code is just a URL. If that URL lives on **your own domain**, you control what happens behind it forever.
+
+```
+   Printed QR code
+   https://go.example.com/menu      ← never changes
+            │
+            ▼
+         Nginx (my VPS)
+            │
+   ┌────────┴─────────┐
+   ▼                  ▼
+ code in the map   anything else
+ 302 → destination  link-in-bio page
+```
+
+The printed URL is fixed. The destination is a line in a text file on the server. Change the line, reload Nginx, done. No reprint.
+
+The only risk left is losing the domain. So: **auto-renewal on the domain, always.** That's the one thing you can't skip.
+
+> **Good fit**
+>
+> - business cards, flyers, menus, stickers, anything printed
+> - a personal link page you want to own
+> - you already have a server running Nginx
+>
+> **Not a good fit**
+>
+> - you need per-scan analytics dashboards, A/B tests, team permissions
+> - you don't want to touch a server at all (then pay, it's fine)
+
+## What I started with
+
+- An Ubuntu VPS already shared with other services (4 GB of RAM, 1 core).
+- A domain, DNS at Namecheap.
+- Nginx and certbot already installed, serving other subdomains.
+
+Since the server was already in production, the first step was making sure I wouldn't break anything:
+
+```bash
+systemctl is-active nginx
+sudo ss -ltnp | grep -E ":(80|443) "
+ls /etc/nginx/conf.d /etc/nginx/sites-enabled
+sudo certbot certificates
+```
+
+Starting from scratch? `sudo apt install nginx certbot python3-certbot-nginx` and you're at the same point.
+
+## DNS
+
+Two `A` records pointing to the VPS:
+
+| Host           | Value    |
+| -------------- | -------- |
+| `go`           | `VPS_IP` |
+| `www.go`       | `VPS_IP` |
+
+Check with `dig +short A go.example.com`.
+
+> Your local DNS cache can remember a "this doesn't exist" answer for a few minutes. Ask your registrar's DNS server directly instead of waiting: `dig @dns1.registrar-servers.com go.example.com`.
+
+## Redirects: just Nginx
+
+This is where I could have reached for a small app with a database and an admin panel. I didn't. Nginx already has everything: a `map` that turns a path into a destination, and `return 302`.
+
+The redirect table, one line per QR code:
+
+```nginx
+# /etc/nginx/qr-redirects.map
+/menu   https://example.org/menu;
+/wifi   https://example.org/wifi-info;
+```
+
+The server block:
+
+```nginx
+# /etc/nginx/conf.d/qr.conf
+map $uri $qr_target {
+    default "";
+    include /etc/nginx/qr-redirects.map;
+}
+
+server {
+    listen 80;
+    listen [::]:80;
+    server_name go.example.com www.go.example.com;
+    access_log /var/log/nginx/qr.access.log;
+    add_header Cache-Control "no-store" always;
+
+    location / {
+        if ($qr_target) { return 302 $qr_target; }
+        return 302 https://example.com;
+    }
+}
+```
+
+Then `sudo nginx -t && sudo systemctl reload nginx`. That's the whole product.
+
+The rules that matter:
+
+- **Always 302, never 301** to the destination. A 301 is cached by phones. Change the destination later and the people who already scanned keep going to the old one.
+- `Cache-Control: no-store`, for the same reason.
+- An unknown code redirects to a default page instead of a 404. Someone scanning a QR code should never land on an error.
+- Changing a destination is editing one line and reloading Nginx. Hot reload, no downtime.
+
+You can test before DNS is even set up, directly on the server:
+
+```bash
+curl -sI -H "Host: go.example.com" http://127.0.0.1/menu
+```
+
+> I got a 404 right after a reload and spent a few minutes confused. A `curl` fired immediately after `systemctl reload` can still hit the old Nginx workers. Wait a second and try again.
+
+## HTTPS
+
+```bash
+sudo certbot --nginx -d go.example.com -d www.go.example.com --redirect
+```
+
+Certbot edits `qr.conf` itself: it adds the 443 block and an HTTP to HTTPS redirect. That redirect is a 301, but it stays on the same domain, so it never freezes a destination. Renewal is handled by the `certbot.timer` systemd timer.
+
+To check end to end from your own machine, even if DNS hasn't propagated locally:
+
+```bash
+curl -sI --resolve go.example.com:443:VPS_IP https://go.example.com/menu
+```
+
+## Scan stats without analytics
+
+I don't need a dashboard. I need to know if people scan. The dedicated access log already answers that:
+
+```bash
+awk '{print $7}' /var/log/nginx/qr.access.log | sort | uniq -c
+```
+
+Scans per code, in one line.
+
+## From redirect to link-in-bio page
+
+Then I wanted the other half of what these services sell: scan, and land on a personal page with my links, not on a bare redirect.
+
+The page is **one `index.html` file**, served statically by the same Nginx. No framework, no build step, no external dependency. Redirects stay in place: a code in the map still redirects, everything else shows the page.
+
+```nginx
+location / {
+    if ($qr_target) { return 302 $qr_target; }
+    root /var/www/qr;
+    try_files $uri /index.html;
+}
+```
+
+Deploying is copying a file:
+
+```bash
+scp index.html ubuntu@VPS_IP:/tmp/qr-index.html
+ssh ubuntu@VPS_IP 'sudo install -m 644 /tmp/qr-index.html /var/www/qr/index.html && rm /tmp/qr-index.html'
+```
+
+A trick I used the whole time: upload as `preview.html` first. Thanks to `try_files $uri`, it's served as is at `/preview.html`. Check it on a real phone, then rename it to `index.html`.
+
+### What's on the page
+
+- A photo, my name linking to LinkedIn, one sentence about me, where I'm based.
+- Two projects with their favicon: Swelly Surf links to its site, Venu opens a **prefilled email** (`mailto:` with an URL-encoded `subject` and `body`).
+- A "Contact me" button, another prefilled `mailto:` ("I need: a tool / a website / a mobile app").
+
+Everything is inlined in the HTML. The photo and favicons are **base64 data URIs**, the flags are inline SVG (flag emojis don't render on Windows). A small Python script replaces `{{PHOTO}}`, `{{SWELLY}}` and `{{VENU}}` markers in a `template.html` with the encoded files and writes `index.html`. About 55 KB, one request, nothing that can break later.
+
+## Design: what I kept, what I threw away
+
+A link page is the first thing people see after scanning, so I spent more time here than on the server.
+
+**Kept:**
+
+- **A glass card**: semi-transparent white background with `backdrop-filter: blur() saturate()`.
+- **Liquid Glass style borders**: an `::after` pseudo-element with a white `conic-gradient`, cut into a ring with `mask` and `mask-composite: exclude`. The gradient angle is a CSS variable, `--light-angle`, driven from JS, so the highlight slides around the edges as you move your phone.
+- **3D tilt**: the card rotates with `rotateX` / `rotateY` from `--tilt-x` and `--tilt-y`.
+- **Motion input**: the mouse on desktop (`pointermove`), the gyroscope on mobile (`deviceorientation`, `gamma` and `beta`). iOS requires `DeviceOrientationEvent.requestPermission()` from a user gesture, so I ask on first touch. Without any input, a slow sine oscillation keeps the card alive. Everything is smoothed in a `requestAnimationFrame` loop with `current += (target - current) * 0.06`.
+- **The background**: white, three blurred halos (blue-grey, sand, silver) drifting slowly, and a dot grid faded with a gradient mask. Halos and dots shift in the opposite direction of the tilt, which gives a light sense of depth.
+- **Accessibility**: `prefers-reduced-motion` turns every animation off, tap targets are at least 44 px, keyboard focus is visible with `:focus-visible`.
+
+**Thrown away:**
+
+- A colorful "aurora" background (purple, teal, pink). Too flashy.
+- **A 3D mountain in Three.js**: fractal noise terrain, snow based on altitude and slope, fog, snowflakes. Fun to build. But it looked cheap, it was heavier (Three.js from a CDN), and on mobile the card hid almost all of it. Hard to justify.
+- **Real Liquid Glass refraction**, distorting the background with an SVG `feDisplacementMap` inside `backdrop-filter`. It only works in Chrome. Most scans come from iPhones. Easy call.
+
+## Traps I fell into
+
+**Safari's bars on iOS.** In a regular Safari tab, your page can't draw under the clock or the address bar. Safari paints them itself:
+
+- if the page has no solid background color (only gradients), it uses white;
+- if a `position: fixed` element touches the edge, it uses that element's color.
+
+So with a dark or colorful background, you always get flat bands at the top and bottom. Switching to a white background fixed it for free. Sometimes the right fix is the design decision, not the CSS.
+
+**Long text on small screens.** At 375 px wide, a long description next to an icon and an arrow wraps to three lines. I tightened the copy and the spacing to fit two lines rather than truncating.
+
+**`mailto:` links.** They do nothing on a computer with no mail app configured. On a phone they always work. Since the page is reached by scanning, that's acceptable.
+
+## The result
+
+| What                      | Paid service           | My setup                                |
+| ------------------------- | ---------------------- | --------------------------------------- |
+| Monthly cost              | a subscription         | 0 (VPS and domain already paid)         |
+| Who owns the printed URL  | the service            | me                                      |
+| Change a destination      | their dashboard        | one line in a text file + reload        |
+| Change the page           | their editor           | replace one HTML file                   |
+| New processes on server   | n/a                    | none, Nginx was already there           |
+
+No app, no database, no third party. The printed URL will keep working as long as I renew a domain I'd renew anyway.
+
+Paid QR services aren't selling technology. They're selling not having a server. If you already have one, you're paying for something you own.
